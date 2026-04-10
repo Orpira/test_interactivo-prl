@@ -1,4 +1,12 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import CategorySelector from "./CategorySelector";
+
+function formatearTiempo(segundos) {
+	if (segundos === null || segundos === undefined) return "";
+	const min = Math.floor(segundos / 60);
+	const seg = segundos % 60;
+	return `${min}:${seg.toString().padStart(2, "0")}`;
+}
 
 function barajar(arr) {
 	const copia = [...arr];
@@ -37,7 +45,23 @@ export default function QuizPRL({
 	const [finalizado, setFinalizado] = useState(false);
 	const [iniciado, setIniciado] = useState(false);
 
-	// Fases: "modo" → "config" → "nombre" → "categorias" → "cantidad" → "test" → "resultado"
+	// Timer
+	const [timerConfig, setTimerConfig] = useState({
+		activo: false,
+		tipo: null,
+		segundos: null,
+	});
+	const [tiempoRestante, setTiempoRestante] = useState(null);
+
+	// Refs para acceso en callbacks del timer
+	const indiceRef = useRef(0);
+	const aciertosRef = useRef(0);
+	const respondidaRef = useRef(false);
+	indiceRef.current = indice;
+	aciertosRef.current = aciertos;
+	respondidaRef.current = respondida;
+
+	// Fases: "modo" → "config" → "nombre" → "categorias" → "cantidad" → "timer" → "test" → "resultado"
 	const [fase, setFase] = useState("modo");
 
 	// Categorías disponibles (extraídas del JSON)
@@ -73,6 +97,88 @@ export default function QuizPRL({
 		opcionesCantidad.push(preguntasFiltradas.length);
 	}
 
+	// --- TIMER EFFECTS ---
+
+	// Cuenta atrás
+	useEffect(() => {
+		if (
+			fase !== "test" ||
+			!timerConfig.activo ||
+			tiempoRestante === null ||
+			tiempoRestante <= 0
+		)
+			return;
+		const id = setTimeout(() => setTiempoRestante((prev) => prev - 1), 1000);
+		return () => clearTimeout(id);
+	}, [tiempoRestante, fase, timerConfig.activo]);
+
+	// Por pregunta: reiniciar timer en cada pregunta nueva
+	useEffect(() => {
+		if (
+			fase !== "test" ||
+			!timerConfig.activo ||
+			timerConfig.tipo !== "pregunta"
+		)
+			return;
+		setTiempoRestante(timerConfig.segundos);
+	}, [indice, fase, timerConfig]);
+
+	// Por test: iniciar timer una sola vez
+	useEffect(() => {
+		if (fase !== "test" || !timerConfig.activo || timerConfig.tipo !== "test")
+			return;
+		setTiempoRestante(timerConfig.segundos);
+	}, [fase, timerConfig]);
+
+	// Timer llega a cero
+	useEffect(() => {
+		if (tiempoRestante !== 0 || !timerConfig.activo || fase !== "test") return;
+
+		if (timerConfig.tipo === "pregunta" && !respondidaRef.current) {
+			setRespondida(true);
+			const timeout = setTimeout(() => {
+				if (indiceRef.current + 1 < preguntas.length) {
+					setIndice((prev) => prev + 1);
+					setSeleccion(null);
+					setRespondida(false);
+				} else {
+					const porcentaje = Math.round(
+						(aciertosRef.current / preguntas.length) * 100,
+					);
+					setFinalizado(true);
+					onResultado({
+						nombre: nombreUsuario.trim(),
+						aciertos: aciertosRef.current,
+						total: preguntas.length,
+						porcentaje,
+					});
+					setFase("resultado");
+				}
+			}, 2000);
+			return () => clearTimeout(timeout);
+		}
+
+		if (timerConfig.tipo === "test") {
+			const currentAciertos = aciertosRef.current;
+			const porcentaje = Math.round((currentAciertos / preguntas.length) * 100);
+			setFinalizado(true);
+			onResultado({
+				nombre: nombreUsuario.trim(),
+				aciertos: currentAciertos,
+				total: preguntas.length,
+				porcentaje,
+			});
+			setFase("resultado");
+		}
+	}, [
+		tiempoRestante,
+		timerConfig,
+		fase,
+		preguntas,
+		onResultado,
+		nombreUsuario,
+	]);
+
 	function seleccionarModo(m) {
 		setModo(m);
 		setFase("config");
@@ -100,10 +206,15 @@ export default function QuizPRL({
 		setFase("cantidad");
 	}
 
-	function iniciarTest(num) {
+	function confirmarCantidad(num) {
 		const seleccionadas = barajar(preguntasFiltradas).slice(0, num);
 		setPreguntas(seleccionadas);
 		setCantidadPreguntas(num);
+		setFase("timer");
+	}
+
+	function iniciarTestConTimer(config) {
+		setTimerConfig(config);
 		setIndice(0);
 		setSeleccion(null);
 		setAciertos(0);
@@ -117,6 +228,9 @@ export default function QuizPRL({
 		if (respondida) return;
 		setSeleccion(idx);
 		setRespondida(true);
+		if (timerConfig.activo && timerConfig.tipo === "pregunta") {
+			setTiempoRestante(null);
+		}
 		if (idx === preguntas[indice].respuesta) {
 			setAciertos((prev) => prev + 1);
 		}
@@ -170,6 +284,8 @@ export default function QuizPRL({
 		setRespondida(false);
 		setFinalizado(false);
 		setIniciado(false);
+		setTimerConfig({ activo: false, tipo: null, segundos: null });
+		setTiempoRestante(null);
 		setFase("modo");
 	}
 
@@ -323,45 +439,23 @@ export default function QuizPRL({
 	// Fase: Elegir categorías (opcional)
 	if (fase === "categorias") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-2xl font-bold mb-2">
-					Hola, {nombreUsuario.trim()} 👋
-				</h2>
-				<p className="text-gray-500 mb-2">
-					¿Quieres filtrar por categorías temáticas?
-				</p>
-				<p className="text-gray-400 text-sm mb-4">
-					Selecciona las que desees o continúa sin filtrar para usar todas
-				</p>
-				<div className="max-w-2xl mx-auto flex flex-wrap justify-center gap-2 mb-6">
-					{categoriasDisponibles.map((cat) => {
-						const activa = categoriasSeleccionadas.includes(cat);
-						const count = todasPreguntas.filter(
-							(p) => p.categoria === cat,
-						).length;
-						return (
-							<button
-								key={cat}
-								onClick={() => toggleCategoria(cat)}
-								className={`px-3 py-1.5 rounded-full text-sm font-medium transition border ${
-									activa
-										? "bg-green-700 text-white border-green-700"
-										: "bg-white text-gray-700 border-gray-300 hover:border-green-500"
-								}`}
-							>
-								{cat} ({count})
-							</button>
-						);
-					})}
-				</div>
-				{categoriasSeleccionadas.length > 0 && (
-					<p className="text-green-700 font-semibold mb-4">
-						{preguntasFiltradas.length} preguntas en{" "}
-						{categoriasSeleccionadas.length} categoría
-						{categoriasSeleccionadas.length > 1 ? "s" : ""}
+			<section id="quiz" className="bg-gray-100 p-8">
+				<div className="text-center mb-6">
+					<h2 className="text-2xl font-bold mb-1">
+						Hola, {nombreUsuario.trim()} 👋
+					</h2>
+					<p className="text-gray-500">
+						Selecciona categorías temáticas o continúa con todas
 					</p>
-				)}
-				<div className="flex flex-col items-center gap-3">
+				</div>
+
+				<CategorySelector
+					preguntas={todasPreguntas}
+					seleccionadas={categoriasSeleccionadas}
+					onChange={setCategoriasSeleccionadas}
+				/>
+
+				<div className="flex flex-col items-center gap-3 mt-6">
 					<button
 						onClick={confirmarCategorias}
 						disabled={
@@ -374,14 +468,6 @@ export default function QuizPRL({
 							? "Continuar con todas las categorías"
 							: "Continuar →"}
 					</button>
-					{categoriasSeleccionadas.length > 0 && (
-						<button
-							onClick={() => setCategoriasSeleccionadas([])}
-							className="text-gray-500 underline text-sm"
-						>
-							Limpiar selección
-						</button>
-					)}
 					<button
 						onClick={() => setFase("nombre")}
 						className="text-gray-500 underline text-sm"
@@ -410,12 +496,93 @@ export default function QuizPRL({
 					{opcionesCantidad.map((n) => (
 						<button
 							key={n}
-							onClick={() => iniciarTest(n)}
+							onClick={() => confirmarCantidad(n)}
 							className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-800 transition text-lg"
 						>
 							{n === todasPreguntas.length ? `Todas (${n})` : `${n} preguntas`}
 						</button>
 					))}
+				</div>
+				<button
+					onClick={() => setFase("categorias")}
+					className="mt-4 text-gray-500 underline text-sm"
+				>
+					← Volver
+				</button>
+			</section>
+		);
+	}
+
+	// Fase: Configurar temporizador (opcional)
+	if (fase === "timer") {
+		return (
+			<section id="quiz" className="bg-gray-100 p-8 text-center">
+				<h2 className="text-2xl font-bold mb-2">⏱️ Temporizador</h2>
+				<p className="text-gray-500 mb-6">
+					¿Quieres jugar con límite de tiempo? Es opcional.
+				</p>
+				<div className="max-w-md mx-auto flex flex-col gap-6">
+					<button
+						onClick={() =>
+							iniciarTestConTimer({ activo: false, tipo: null, segundos: null })
+						}
+						className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-800 transition text-lg"
+					>
+						Sin temporizador
+					</button>
+
+					<div>
+						<p className="text-sm text-gray-600 mb-3 font-semibold">
+							Por pregunta:
+						</p>
+						<div className="flex flex-wrap justify-center gap-3">
+							{[15, 30, 45, 60].map((s) => (
+								<button
+									key={s}
+									onClick={() =>
+										iniciarTestConTimer({
+											activo: true,
+											tipo: "pregunta",
+											segundos: s,
+										})
+									}
+									className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-700 transition"
+								>
+									{s}s
+								</button>
+							))}
+						</div>
+					</div>
+
+					<div>
+						<p className="text-sm text-gray-600 mb-3 font-semibold">
+							Por test completo:
+						</p>
+						<div className="flex flex-wrap justify-center gap-3">
+							{[5, 10, 15, 20].map((m) => (
+								<button
+									key={m}
+									onClick={() =>
+										iniciarTestConTimer({
+											activo: true,
+											tipo: "test",
+											segundos: m * 60,
+										})
+									}
+									className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+								>
+									{m} min
+								</button>
+							))}
+						</div>
+					</div>
+
+					<button
+						onClick={() => setFase("cantidad")}
+						className="text-gray-500 underline text-sm"
+					>
+						← Volver
+					</button>
 				</div>
 			</section>
 		);
@@ -437,7 +604,30 @@ export default function QuizPRL({
 					<span className="font-semibold text-green-700">
 						{aciertos} aciertos
 					</span>
+					{timerConfig.activo && tiempoRestante !== null && (
+						<>
+							{" "}
+							&middot;{" "}
+							<span
+								className={`font-mono font-bold ${
+									tiempoRestante <= (timerConfig.tipo === "pregunta" ? 5 : 30)
+										? "text-red-600 animate-pulse"
+										: tiempoRestante <=
+											  (timerConfig.tipo === "pregunta" ? 10 : 60)
+											? "text-orange-600"
+											: "text-gray-700"
+								}`}
+							>
+								⏱️ {formatearTiempo(tiempoRestante)}
+							</span>
+						</>
+					)}
 				</p>
+				{respondida && seleccion === null && tiempoRestante === 0 && (
+					<p className="text-center text-red-600 font-semibold mb-2">
+						⏱️ ¡Tiempo agotado!
+					</p>
+				)}
 				<div className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow">
 					<span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded mb-3">
 						{preguntaActual.categoria}

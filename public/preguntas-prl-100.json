@@ -1,0 +1,1202 @@
+[
+	{
+		"id": 1,
+		"categoria": "Ley 31/1995 LPRL",
+		"pregunta": "¿Cuál es el objeto principal de la Ley 31/1995 de Prevención de Riesgos Laborales?",
+		"opciones": [
+			"Promover la seguridad y la salud de los trabajadores mediante la aplicación de medidas preventivas",
+			"Regular las relaciones laborales entre empresarios y trabajadores",
+			"Establecer las sanciones por incumplimiento de contratos",
+			"Regular el salario mínimo interprofesional"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 2,
+		"categoria": "Ley 31/1995 LPRL",
+		"pregunta": "¿Quién tiene la obligación principal de garantizar la seguridad y salud de los trabajadores?",
+		"opciones": [
+			"El trabajador",
+			"El empresario",
+			"El delegado de prevención",
+			"La inspección de trabajo"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 3,
+		"categoria": "Evaluación de Riesgos",
+		"pregunta": "¿Qué es una evaluación de riesgos laborales?",
+		"opciones": [
+			"Un documento que recoge los salarios de los empleados",
+			"El proceso de identificar los peligros existentes en el lugar de trabajo y valorar los riesgos",
+			"Una auditoría financiera de la empresa",
+			"Un examen médico obligatorio para los trabajadores"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 4,
+		"categoria": "Equipos de Protección",
+		"pregunta": "¿Qué son los EPI (Equipos de Protección Individual)?",
+		"opciones": [
+			"Herramientas de trabajo proporcionadas por la empresa",
+			"Equipos de primeros auxilios",
+			"Sistemas de ventilación en el lugar de trabajo",
+			"Equipos destinados a ser llevados por el trabajador para protegerle de riesgos"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 5,
+		"categoria": "Delegados de Prevención",
+		"pregunta": "¿Cuántos delegados de prevención corresponden a una empresa de 100 a 500 trabajadores?",
+		"opciones": [
+			"1 delegado",
+			"2 delegados",
+			"4 delegados",
+			"3 delegados"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 6,
+		"categoria": "Plan de Prevención",
+		"pregunta": "¿Qué debe incluir el Plan de Prevención de Riesgos Laborales?",
+		"opciones": [
+			"Solo los datos económicos de la empresa",
+			"La estructura organizativa, responsabilidades, funciones, prácticas y procedimientos preventivos",
+			"Únicamente la lista de trabajadores",
+			"Solo el inventario de maquinaria"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 7,
+		"categoria": "Formación",
+		"pregunta": "¿Cuándo debe el empresario proporcionar formación en PRL a los trabajadores?",
+		"opciones": [
+			"En el momento de la contratación y cuando se produzcan cambios en las funciones o tecnologías",
+			"Solo cuando lo solicite el trabajador",
+			"Únicamente una vez al año",
+			"Solo cuando ocurra un accidente"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 8,
+		"categoria": "Señalización",
+		"pregunta": "¿De qué color es la señal de prohibición según la normativa de señalización de seguridad?",
+		"opciones": [
+			"Amarillo",
+			"Azul",
+			"Rojo",
+			"Verde"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 9,
+		"categoria": "Comité de Seguridad",
+		"pregunta": "¿A partir de cuántos trabajadores es obligatorio constituir un Comité de Seguridad y Salud?",
+		"opciones": [
+			"25 trabajadores",
+			"50 trabajadores",
+			"100 trabajadores",
+			"10 trabajadores"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 10,
+		"categoria": "Riesgos Laborales",
+		"pregunta": "¿Qué tipo de riesgo laboral supone la exposición prolongada a ruido en el puesto de trabajo?",
+		"opciones": [
+			"Riesgo químico",
+			"Riesgo biológico",
+			"Riesgo físico",
+			"Riesgo ergonómico"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 11,
+		"categoria": "Emergencias",
+		"pregunta": "¿Qué debe hacer el empresario en relación a las situaciones de emergencia?",
+		"opciones": [
+			"Ignorarlas si no han ocurrido antes",
+			"Analizar las posibles situaciones de emergencia y adoptar las medidas necesarias",
+			"Delegar toda la responsabilidad al trabajador",
+			"Esperar a que ocurra un incidente para actuar"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 12,
+		"categoria": "Vigilancia de la Salud",
+		"pregunta": "La vigilancia de la salud de los trabajadores es, con carácter general:",
+		"opciones": [
+			"Obligatoria para todos los trabajadores",
+			"Solo necesaria en trabajos de construcción",
+			"Opcional para el empresario",
+			"Voluntaria para el trabajador, salvo excepciones legales"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 13,
+		"categoria": "Accidente de Trabajo",
+		"pregunta": "¿Qué se considera accidente de trabajo según la normativa española?",
+		"opciones": [
+			"Toda lesión corporal que el trabajador sufra con ocasión o por consecuencia del trabajo",
+			"Solo las lesiones ocurridas en el puesto de trabajo",
+			"Solo las enfermedades crónicas",
+			"Únicamente los accidentes con baja médica"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 14,
+		"categoria": "Ley 31/1995 LPRL",
+		"pregunta": "¿Cuál de los siguientes es un derecho de los trabajadores en materia de PRL?",
+		"opciones": [
+			"Ser informado sobre los riesgos de su puesto de trabajo",
+			"Exigir un aumento de sueldo",
+			"Elegir su horario de trabajo",
+			"Decidir qué EPI usar sin consultar al empresario"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 15,
+		"categoria": "Riesgos Ergonómicos",
+		"pregunta": "¿Qué medida preventiva es adecuada para evitar trastornos musculoesqueléticos en trabajos con PVD (Pantallas de Visualización de Datos)?",
+		"opciones": [
+			"Trabajar sin interrupciones durante toda la jornada",
+			"Aumentar el brillo de la pantalla al máximo",
+			"Realizar pausas periódicas y alternar tareas",
+			"Sentarse lo más lejos posible de la pantalla"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 16,
+		"categoria": "Ley 31/1995 LPRL",
+		"pregunta": "¿A qué ámbito de aplicación se extiende la Ley 31/1995 de PRL?",
+		"opciones": [
+			"Solo a empresas privadas con más de 50 trabajadores",
+			"Solo a industrias con riesgos químicos",
+			"Únicamente a trabajadores autónomos",
+			"A las relaciones laborales reguladas en el Estatuto de los Trabajadores y al personal civil de las Administraciones Públicas"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 17,
+		"categoria": "Ley 31/1995 LPRL",
+		"pregunta": "¿Cuál es el principio jerárquico de la acción preventiva según el artículo 15 de la LPRL?",
+		"opciones": [
+			"Primero proteger con EPI y después eliminar el riesgo",
+			"Actuar sobre las consecuencias antes que sobre las causas",
+			"Informar al trabajador antes de cualquier otra acción",
+			"Evitar los riesgos en primer lugar, y si no es posible, evaluarlos y combatirlos en su origen"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 18,
+		"categoria": "Ley 31/1995 LPRL",
+		"pregunta": "¿Cuál de las siguientes obligaciones recae sobre el trabajador según la LPRL?",
+		"opciones": [
+			"Diseñar el plan de prevención de la empresa",
+			"Contratar el servicio de prevención ajeno",
+			"Realizar la evaluación de riesgos de su puesto",
+			"Usar correctamente los medios y equipos de protección facilitados por el empresario"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 19,
+		"categoria": "Ley 31/1995 LPRL",
+		"pregunta": "¿Qué organismo público tiene competencia en materia de seguridad y salud en el trabajo en España a nivel estatal?",
+		"opciones": [
+			"El Instituto Nacional de la Seguridad Social (INSS)",
+			"El Instituto Nacional de Seguridad y Salud en el Trabajo (INSST)",
+			"La Agencia Tributaria",
+			"El Ministerio de Educación"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 20,
+		"categoria": "Ley 31/1995 LPRL",
+		"pregunta": "¿Qué se entiende por 'riesgo laboral grave e inminente' en la LPRL?",
+		"opciones": [
+			"Cualquier riesgo que pueda producir daño en el futuro",
+			"El riesgo que afecte a más de 10 trabajadores simultáneamente",
+			"Un riesgo que ya ha causado un accidente leve",
+			"Aquel que resulte probable racionalmente que se materialice en un futuro inmediato y pueda suponer daño grave para la salud del trabajador"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 21,
+		"categoria": "Evaluación de Riesgos",
+		"pregunta": "¿Con qué frecuencia debe revisarse la evaluación de riesgos?",
+		"opciones": [
+			"Solo cuando lo indique la inspección de trabajo",
+			"Cuando se produzcan daños a la salud, cambios en condiciones de trabajo o nuevas tecnologías",
+			"Cada 10 años como mínimo",
+			"Únicamente al inicio de la actividad empresarial"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 22,
+		"categoria": "Evaluación de Riesgos",
+		"pregunta": "¿Quién puede realizar la evaluación de riesgos en una empresa?",
+		"opciones": [
+			"Técnicos con formación en prevención de riesgos laborales o el servicio de prevención",
+			"Solo los delegados de prevención",
+			"Cualquier trabajador de la empresa sin formación específica",
+			"Exclusivamente la Inspección de Trabajo"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 23,
+		"categoria": "Evaluación de Riesgos",
+		"pregunta": "¿Qué factores se tienen en cuenta para valorar un riesgo laboral?",
+		"opciones": [
+			"Solo la probabilidad de que ocurra el daño",
+			"Únicamente la gravedad de las posibles lesiones",
+			"La probabilidad de que se produzca el daño y la severidad del mismo",
+			"El número de trabajadores expuestos y el coste económico"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 24,
+		"categoria": "Evaluación de Riesgos",
+		"pregunta": "En la metodología de evaluación de riesgos, ¿qué significa un riesgo clasificado como 'trivial'?",
+		"opciones": [
+			"No requiere acción preventiva ni registro",
+			"Requiere acción inmediata",
+			"Debe ser eliminado en menos de 24 horas",
+			"Implica paralización del trabajo"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 25,
+		"categoria": "Equipos de Protección",
+		"pregunta": "¿Quién es responsable de proporcionar los EPI a los trabajadores?",
+		"opciones": [
+			"El empresario, de forma gratuita",
+			"El delegado de prevención",
+			"El propio trabajador",
+			"El servicio público de empleo"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 26,
+		"categoria": "Equipos de Protección",
+		"pregunta": "¿Cuál de los siguientes NO es un equipo de protección individual?",
+		"opciones": [
+			"Casco de seguridad",
+			"Guantes de protección química",
+			"Gafas de seguridad",
+			"Extintor de incendios"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 27,
+		"categoria": "Equipos de Protección",
+		"pregunta": "¿Cuándo se deben usar los EPI según la normativa?",
+		"opciones": [
+			"Siempre que el trabajador lo considere oportuno",
+			"Solo en sectores de alta peligrosidad",
+			"Solo ante riesgos que no puedan evitarse o limitarse suficientemente por medios colectivos",
+			"Únicamente cuando lo indique la Inspección de Trabajo"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 28,
+		"categoria": "Equipos de Protección",
+		"pregunta": "¿Qué marcado de conformidad europeo deben llevar los EPI comercializados en España?",
+		"opciones": [
+			"Marcado ISO",
+			"Marcado CE",
+			"Marcado EN",
+			"Marcado UNE"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 29,
+		"categoria": "Señalización",
+		"pregunta": "¿Qué tipo de señal de seguridad se utiliza para indicar la ubicación de los equipos de lucha contra incendios?",
+		"opciones": [
+			"Señal verde",
+			"Señal amarilla",
+			"Señal azul",
+			"Señal roja"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 30,
+		"categoria": "Señalización",
+		"pregunta": "¿Qué forma geométrica tienen las señales de obligación?",
+		"opciones": [
+			"Circular con fondo azul",
+			"Triangular con borde rojo",
+			"Rectangular con fondo verde",
+			"Cuadrada con fondo amarillo"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 31,
+		"categoria": "Señalización",
+		"pregunta": "¿Qué significa una señal de advertencia triangular con fondo amarillo y borde negro?",
+		"opciones": [
+			"Indica una salida de emergencia",
+			"Prohíbe una acción",
+			"Advierte de un peligro o riesgo",
+			"Obliga a usar un EPI"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 32,
+		"categoria": "Señalización",
+		"pregunta": "¿Qué color identifica las señales de salvamento o socorro (evacuación, salidas de emergencia)?",
+		"opciones": [
+			"Azul",
+			"Rojo",
+			"Verde",
+			"Amarillo"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 33,
+		"categoria": "Comité de Seguridad",
+		"pregunta": "¿Con qué periodicidad mínima debe reunirse el Comité de Seguridad y Salud?",
+		"opciones": [
+			"Diariamente",
+			"Semanalmente",
+			"Trimestralmente",
+			"Anualmente"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 34,
+		"categoria": "Comité de Seguridad",
+		"pregunta": "¿Quiénes forman parte del Comité de Seguridad y Salud?",
+		"opciones": [
+			"Los delegados de prevención y los representantes del empresario en igual número",
+			"Solo los representantes de la empresa",
+			"Solo los delegados de prevención",
+			"El director de RRHH y el médico de empresa"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 35,
+		"categoria": "Delegados de Prevención",
+		"pregunta": "¿Cómo se designan los delegados de prevención?",
+		"opciones": [
+			"Los designa directamente el empresario",
+			"Los designan los representantes del personal entre sus miembros",
+			"Los designa la Inspección de Trabajo",
+			"Son elegidos por votación directa de todos los trabajadores"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 36,
+		"categoria": "Delegados de Prevención",
+		"pregunta": "¿Cuántos delegados de prevención corresponden a una empresa de 6 a 49 trabajadores?",
+		"opciones": [
+			"Ninguno",
+			"2 delegados",
+			"1 delegado",
+			"3 delegados"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 37,
+		"categoria": "Delegados de Prevención",
+		"pregunta": "¿Qué garantía tienen los delegados de prevención en el ejercicio de sus funciones?",
+		"opciones": [
+			"Un incremento salarial del 10%",
+			"El derecho a ocupar el cargo de director de prevención",
+			"La imposibilidad de ser sancionados o despedidos por el ejercicio de sus funciones",
+			"La exención del cumplimiento de su jornada laboral habitual"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 38,
+		"categoria": "Servicios de Prevención",
+		"pregunta": "¿Cuáles son las modalidades de organización de la actividad preventiva reconocidas en la normativa?",
+		"opciones": [
+			"Solo el servicio de prevención propio o ajeno",
+			"Únicamente el servicio de prevención ajeno",
+			"Asunción personal por el empresario, trabajadores designados, servicio de prevención propio o ajeno",
+			"Solo los trabajadores designados o el servicio propio"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 39,
+		"categoria": "Servicios de Prevención",
+		"pregunta": "¿Cuándo puede el empresario asumir personalmente la actividad preventiva?",
+		"opciones": [
+			"Siempre que lo desee",
+			"Cuando la empresa tenga hasta 10 trabajadores, el empresario desarrolle habitualmente su actividad en el centro y tenga la formación adecuada",
+			"En cualquier empresa de menos de 50 trabajadores",
+			"Solo en actividades de bajo riesgo con hasta 500 trabajadores"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 40,
+		"categoria": "Servicios de Prevención",
+		"pregunta": "¿Qué especialidades o disciplinas preventivas deben cubrir los servicios de prevención?",
+		"opciones": [
+			"Solo seguridad en el trabajo e higiene industrial",
+			"Solo medicina del trabajo",
+			"Seguridad en el trabajo, higiene industrial, ergonomía y psicosociología aplicada, y medicina del trabajo",
+			"Ergonomía y primeros auxilios"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 41,
+		"categoria": "Accidente de Trabajo",
+		"pregunta": "¿Qué es un accidente 'in itinere'?",
+		"opciones": [
+			"Un accidente ocurrido durante una actividad de ocio",
+			"Un accidente causado por imprudencia temeraria del trabajador",
+			"Un accidente dentro de las instalaciones de la empresa",
+			"El accidente sufrido por el trabajador al ir o volver del trabajo"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 42,
+		"categoria": "Accidente de Trabajo",
+		"pregunta": "¿Qué documento debe cumplimentarse cuando ocurre un accidente de trabajo con baja laboral?",
+		"opciones": [
+			"El informe de evaluación de riesgos",
+			"El contrato de trabajo del accidentado",
+			"El plan de emergencia",
+			"El parte de accidente de trabajo"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 43,
+		"categoria": "Accidente de Trabajo",
+		"pregunta": "¿Qué es un 'incidente' o 'casi accidente' en el ámbito de la PRL?",
+		"opciones": [
+			"Un accidente grave que produce lesiones mortales",
+			"Una enfermedad profesional declarada",
+			"Un suceso no deseado que no produce lesiones pero que podría haberlas producido",
+			"Un accidente con baja médica inferior a 3 días"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 44,
+		"categoria": "Enfermedades Profesionales",
+		"pregunta": "¿Qué diferencia existe entre accidente de trabajo y enfermedad profesional?",
+		"opciones": [
+			"No existe diferencia, son términos equivalentes",
+			"Solo el accidente de trabajo genera prestaciones de la Seguridad Social",
+			"El accidente de trabajo siempre produce baja médica y la enfermedad profesional no",
+			"La enfermedad profesional es la contraída como consecuencia del trabajo en actividades especificadas en el cuadro de enfermedades profesionales, mientras el accidente es una lesión repentina"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 45,
+		"categoria": "Enfermedades Profesionales",
+		"pregunta": "¿Cuál de las siguientes es una enfermedad profesional reconocida por exposición a agentes químicos?",
+		"opciones": [
+			"Intoxicación por plomo (saturnismo)",
+			"Lumbalgia por esfuerzo puntual",
+			"Fractura ósea por caída",
+			"Quemadura por accidente"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 46,
+		"categoria": "Riesgos Químicos",
+		"pregunta": "¿Qué vía de entrada de sustancias químicas peligrosas es la más frecuente en el entorno laboral?",
+		"opciones": [
+			"Vía inhalatoria (a través de las vías respiratorias)",
+			"Vía dérmica (a través de la piel)",
+			"Vía digestiva (ingestión accidental)",
+			"Vía ocular"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 47,
+		"categoria": "Riesgos Químicos",
+		"pregunta": "¿Qué información debe proporcionar la ficha de datos de seguridad (FDS) de un producto químico?",
+		"opciones": [
+			"La composición, riesgos, medidas de primeros auxilios, manipulación y almacenamiento, entre otros datos",
+			"Solo el precio del producto",
+			"Únicamente las propiedades físicas del producto",
+			"Solo el nombre comercial y el fabricante"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 48,
+		"categoria": "Riesgos Químicos",
+		"pregunta": "¿Qué pictograma del sistema GHS/CLP indica que una sustancia es inflamable?",
+		"opciones": [
+			"Una llama",
+			"Una calavera sobre dos tibias cruzadas",
+			"Un árbol y un pez muerto",
+			"Un signo de exclamación"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 49,
+		"categoria": "Riesgos Biológicos",
+		"pregunta": "¿Qué trabajadores tienen mayor riesgo de exposición a agentes biológicos?",
+		"opciones": [
+			"Trabajadores de oficina",
+			"Trabajadores de comercio minorista",
+			"Conductores de vehículos",
+			"Personal sanitario, trabajadores de laboratorio y trabajadores de gestión de residuos"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 50,
+		"categoria": "Riesgos Biológicos",
+		"pregunta": "¿En cuántos grupos se clasifican los agentes biológicos según su peligrosidad?",
+		"opciones": [
+			"2 grupos",
+			"3 grupos",
+			"4 grupos",
+			"5 grupos"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 51,
+		"categoria": "Riesgos Físicos",
+		"pregunta": "¿Cuál es el nivel de ruido a partir del cual el empresario está obligado a proporcionar protectores auditivos, según la normativa española?",
+		"opciones": [
+			"75 dB(A)",
+			"80 dB(A)",
+			"85 dB(A)",
+			"90 dB(A)"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 52,
+		"categoria": "Riesgos Físicos",
+		"pregunta": "¿Qué tipo de vibración afecta a todo el cuerpo (tronco y cabeza) del trabajador?",
+		"opciones": [
+			"Vibración mano-brazo",
+			"Vibración de baja frecuencia",
+			"Vibración de cuerpo entero",
+			"Vibración localizada"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 53,
+		"categoria": "Riesgos Físicos",
+		"pregunta": "¿Qué efecto en la salud puede producir la exposición prolongada a radiaciones ultravioleta en el trabajo?",
+		"opciones": [
+			"Hipotermia",
+			"Daños oculares y cáncer de piel",
+			"Intoxicación alimentaria",
+			"Trastornos del sueño exclusivamente"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 54,
+		"categoria": "Riesgos Ergonómicos",
+		"pregunta": "¿Cuál es el peso máximo recomendado para la manipulación manual de cargas en condiciones ideales según el INSST?",
+		"opciones": [
+			"25 kg",
+			"10 kg",
+			"5 kg",
+			"50 kg"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 55,
+		"categoria": "Riesgos Ergonómicos",
+		"pregunta": "¿Qué método se utiliza frecuentemente para la evaluación de posturas en el trabajo?",
+		"opciones": [
+			"Método FMEA",
+			"Método de Monte Carlo",
+			"Método REBA o RULA",
+			"Método de los 5 porqués"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 56,
+		"categoria": "Riesgos Ergonómicos",
+		"pregunta": "¿Qué se entiende por 'carga mental' en el trabajo?",
+		"opciones": [
+			"El peso físico que debe cargar el trabajador",
+			"El nivel de esfuerzo mental requerido para realizar una tarea",
+			"El número de horas extra trabajadas",
+			"La cantidad de información impresa que debe leer el trabajador"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 57,
+		"categoria": "Riesgos Psicosociales",
+		"pregunta": "¿Qué es el síndrome de 'burnout' o desgaste profesional?",
+		"opciones": [
+			"Una lesión muscular por sobreesfuerzo",
+			"Un estado de agotamiento emocional, despersonalización y reducida realización personal relacionado con el trabajo",
+			"Una intoxicación por productos químicos",
+			"Un accidente de trabajo de tipo ergonómico"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 58,
+		"categoria": "Riesgos Psicosociales",
+		"pregunta": "¿Cuál de los siguientes factores psicosociales puede ser fuente de estrés laboral?",
+		"opciones": [
+			"Escasa autonomía en el trabajo y alta carga de trabajo",
+			"Iluminación adecuada del puesto",
+			"Temperatura confortable en el ambiente de trabajo",
+			"Relaciones laborales cordiales"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 59,
+		"categoria": "Riesgos Psicosociales",
+		"pregunta": "¿Qué es el mobbing o acoso laboral?",
+		"opciones": [
+			"Un riesgo físico derivado del trabajo en espacios reducidos",
+			"Una sobrecarga de trabajo temporal",
+			"Una enfermedad causada por agentes biológicos",
+			"El hostigamiento psicológico en el trabajo de forma sistemática y prolongada sobre una persona"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 60,
+		"categoria": "Incendios",
+		"pregunta": "¿Cuáles son los tres elementos necesarios para que se produzca un incendio (triángulo del fuego)?",
+		"opciones": [
+			"Calor, electricidad y combustible",
+			"Combustible, agua y calor",
+			"Combustible, comburente (oxígeno) y fuente de ignición (calor)",
+			"Oxígeno, nitrógeno y calor"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 61,
+		"categoria": "Incendios",
+		"pregunta": "¿Qué tipo de extintor es adecuado para apagar fuegos de tipo A (materiales sólidos como madera y papel)?",
+		"opciones": [
+			"Extintor de polvo ABC",
+			"Extintor de CO₂",
+			"Extintor de arena",
+			"Extintor de halón"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 62,
+		"categoria": "Incendios",
+		"pregunta": "¿Qué extintor NO debe usarse nunca en un incendio de instalaciones eléctricas bajo tensión?",
+		"opciones": [
+			"Extintor de polvo seco",
+			"Extintor de CO₂",
+			"Extintor de agua",
+			"Extintor de halón"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 63,
+		"categoria": "Incendios",
+		"pregunta": "¿Qué se debe hacer en caso de escuchar la alarma de incendios en un edificio?",
+		"opciones": [
+			"Buscar el origen del fuego antes de evacuar",
+			"Evacuar el edificio siguiendo las vías de evacuación hacia los puntos de reunión",
+			"Utilizar el ascensor para salir más rápido",
+			"Esperar instrucciones en el propio puesto de trabajo"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 64,
+		"categoria": "Primeros Auxilios",
+		"pregunta": "¿Cuál es la primera actuación ante un accidentado según el protocolo PAS?",
+		"opciones": [
+			"Avisar a los servicios de emergencia",
+			"Trasladar al herido al hospital",
+			"Socorrer al herido",
+			"Proteger el lugar del accidente y al accidentado"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 65,
+		"categoria": "Primeros Auxilios",
+		"pregunta": "¿Qué significa el acrónimo PAS en primeros auxilios?",
+		"opciones": [
+			"Proteger, Asistir, Salvar",
+			"Prevenir, Alertar, Socorrer",
+			"Proteger, Avisar, Socorrer",
+			"Proteger, Actuar, Supervisar"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 66,
+		"categoria": "Primeros Auxilios",
+		"pregunta": "¿En qué posición se debe colocar a una persona inconsciente que respira de forma normal?",
+		"opciones": [
+			"Posición lateral de seguridad (PLS)",
+			"Boca arriba con las piernas elevadas",
+			"Sentada con la cabeza inclinada hacia delante",
+			"Boca abajo con los brazos extendidos"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 67,
+		"categoria": "Primeros Auxilios",
+		"pregunta": "¿Cuántas compresiones torácicas por minuto se deben realizar en la RCP básica para adultos?",
+		"opciones": [
+			"40-60 compresiones por minuto",
+			"80-100 compresiones por minuto",
+			"100-120 compresiones por minuto",
+			"150 compresiones por minuto"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 68,
+		"categoria": "Primeros Auxilios",
+		"pregunta": "¿Qué no debe hacerse ante una hemorragia externa grave?",
+		"opciones": [
+			"Aplicar presión directa sobre la herida",
+			"Retirar objetos clavados en la herida para limpiarla mejor",
+			"Mantener al herido en reposo",
+			"Llamar a los servicios de emergencia"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 69,
+		"categoria": "Lugares de Trabajo",
+		"pregunta": "¿Cuál es la temperatura mínima recomendada para trabajos sedentarios en locales cerrados según el RD 486/1997?",
+		"opciones": [
+			"10-15 °C",
+			"14-18 °C",
+			"25-30 °C",
+			"17-27 °C"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 70,
+		"categoria": "Lugares de Trabajo",
+		"pregunta": "¿Cuál debe ser la altura mínima libre en los locales de trabajo según el RD 486/1997?",
+		"opciones": [
+			"2,5 metros",
+			"2 metros",
+			"3 metros",
+			"4 metros"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 71,
+		"categoria": "Lugares de Trabajo",
+		"pregunta": "¿Qué nivel mínimo de iluminación se exige en zonas de trabajo donde se realizan exigencias visuales moderadas?",
+		"opciones": [
+			"50 lux",
+			"100 lux",
+			"200 lux",
+			"500 lux"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 72,
+		"categoria": "Lugares de Trabajo",
+		"pregunta": "¿Qué se entiende por 'vía de evacuación' en un lugar de trabajo?",
+		"opciones": [
+			"El recorrido que deben seguir los trabajadores desde sus puestos hasta un lugar seguro en caso de emergencia",
+			"El pasillo principal de acceso a la empresa",
+			"La ruta de aprovisionamiento de materiales",
+			"El itinerario del transporte de empresa"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 73,
+		"categoria": "Trabajos Especiales",
+		"pregunta": "¿Qué es un 'espacio confinado' en el contexto de la prevención de riesgos?",
+		"opciones": [
+			"Una oficina pequeña sin ventanas",
+			"Un recinto con aberturas limitadas de entrada, no diseñado para ser ocupado de forma continuada y con ventilación natural deficiente",
+			"Un almacén de materiales peligrosos",
+			"Un área de producción con muchas máquinas"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 74,
+		"categoria": "Trabajos Especiales",
+		"pregunta": "¿Qué documento es obligatorio antes de realizar trabajos especialmente peligrosos (como soldadura en zonas de riesgo o trabajos en espacios confinados)?",
+		"opciones": [
+			"El parte de accidente",
+			"El contrato de trabajo",
+			"La nómina del trabajador",
+			"El permiso de trabajo"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 75,
+		"categoria": "Trabajos Especiales",
+		"pregunta": "¿Qué medida preventiva es imprescindible en trabajos en altura superiores a 2 metros?",
+		"opciones": [
+			"Uso de mascarilla",
+			"Uso de arnés de seguridad o protección colectiva contra caídas",
+			"Uso de guantes dieléctricos",
+			"Instalación de señales de advertencia sonora"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 76,
+		"categoria": "Trabajos Especiales",
+		"pregunta": "¿Qué riesgo específico conlleva el trabajo nocturno para la salud del trabajador?",
+		"opciones": [
+			"Alteraciones del ritmo circadiano y mayor riesgo de problemas cardiovasculares y digestivos",
+			"Mayor exposición a radiaciones ionizantes",
+			"Exposición a ruidos de alta frecuencia",
+			"Aumento del riesgo de enfermedades de la piel"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 77,
+		"categoria": "Coordinación de Actividades",
+		"pregunta": "¿Qué es la coordinación de actividades empresariales (CAE)?",
+		"opciones": [
+			"La planificación de turnos de trabajo entre empleados de la misma empresa",
+			"La coordinación entre los delegados de prevención y el empresario",
+			"El conjunto de medidas para controlar los riesgos cuando en un mismo centro de trabajo operan trabajadores de varias empresas",
+			"La colaboración entre inspectores de trabajo de diferentes comunidades autónomas"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 78,
+		"categoria": "Coordinación de Actividades",
+		"pregunta": "¿Qué es la figura del 'recurso preventivo' en obra de construcción?",
+		"opciones": [
+			"El técnico que realiza la evaluación de riesgos de la obra",
+			"Una o varias personas designadas con presencia en el centro de trabajo para vigilar el cumplimiento de las medidas preventivas",
+			"El coordinador de seguridad y salud",
+			"El inspector de trabajo asignado a la obra"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 79,
+		"categoria": "Construcción",
+		"pregunta": "¿Qué documento de gestión preventiva es específico del sector de la construcción?",
+		"opciones": [
+			"El plan de emergencia interior",
+			"La evaluación de riesgos higiénicos",
+			"El Estudio de Seguridad y Salud (o Estudio Básico) y el Plan de Seguridad y Salud",
+			"El manual de procedimientos del servicio de prevención"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 80,
+		"categoria": "Construcción",
+		"pregunta": "¿Quién elabora el Plan de Seguridad y Salud en las obras de construcción?",
+		"opciones": [
+			"El promotor de la obra",
+			"El coordinador de seguridad y salud en fase de proyecto",
+			"El contratista o empresa principal que ejecuta la obra",
+			"La Inspección de Trabajo"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 81,
+		"categoria": "Formación",
+		"pregunta": "¿La formación en PRL debe impartirse preferiblemente en qué momento?",
+		"opciones": [
+			"Fuera del horario de trabajo y a costa del trabajador",
+			"Dentro de la jornada laboral o descontándose de la misma, a cargo del empresario",
+			"Solo durante los primeros 6 meses de contrato",
+			"Únicamente mediante cursos online sin tutorización"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 82,
+		"categoria": "Formación",
+		"pregunta": "¿Cuál es el nivel de formación mínimo para ejercer funciones de nivel básico en prevención de riesgos laborales?",
+		"opciones": [
+			"30 horas (actividades con bajo riesgo) o 60 horas (resto de actividades)",
+			"200 horas",
+			"Máster universitario en PRL",
+			"Titulación universitaria en ingeniería"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 83,
+		"categoria": "Vigilancia de la Salud",
+		"pregunta": "¿Quién tiene acceso a los resultados individuales de los reconocimientos médicos de los trabajadores?",
+		"opciones": [
+			"El empresario, de forma directa e íntegra",
+			"Los representantes de los trabajadores",
+			"El trabajador, el personal médico y las autoridades sanitarias en caso de necesidad",
+			"Cualquier miembro del servicio de prevención"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 84,
+		"categoria": "Vigilancia de la Salud",
+		"pregunta": "¿Con qué finalidad se realizan los reconocimientos médicos en el ámbito laboral?",
+		"opciones": [
+			"Para detectar enfermedades comunes sin relación con el trabajo",
+			"Para seleccionar candidatos en los procesos de contratación",
+			"Para controlar el absentismo laboral",
+			"Para vigilar el estado de salud de los trabajadores en función de los riesgos inherentes a su trabajo"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 85,
+		"categoria": "Responsabilidades y Sanciones",
+		"pregunta": "¿Qué tipos de responsabilidad puede acarrear el incumplimiento de la normativa de PRL para el empresario?",
+		"opciones": [
+			"Solo responsabilidad económica",
+			"Responsabilidad administrativa, civil, penal y de Seguridad Social",
+			"Únicamente responsabilidad penal",
+			"Solo responsabilidad administrativa con multa máxima de 300 euros"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 86,
+		"categoria": "Responsabilidades y Sanciones",
+		"pregunta": "¿Cuál es la cuantía máxima de las sanciones en materia de PRL según la LISOS (Ley de Infracciones y Sanciones en el Orden Social)?",
+		"opciones": [
+			"6.000 euros",
+			"819.780 euros",
+			"30.000 euros",
+			"2.000.000 euros"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 87,
+		"categoria": "Responsabilidades y Sanciones",
+		"pregunta": "¿Quién tiene la potestad sancionadora en materia de seguridad y salud en el trabajo?",
+		"opciones": [
+			"El Comité de Seguridad y Salud",
+			"El jurado de empresa",
+			"Los delegados de prevención",
+			"La Inspección de Trabajo y Seguridad Social"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 88,
+		"categoria": "Plan de Prevención",
+		"pregunta": "¿Cuáles son los documentos que, como mínimo, debe elaborar y conservar el empresario en materia de PRL?",
+		"opciones": [
+			"Solo el plan de prevención",
+			"El plan de autoprotección y la memoria anual",
+			"Solo la evaluación de riesgos y el plan de emergencia",
+			"El plan de prevención, la evaluación de riesgos, la planificación de la actividad preventiva y los controles de salud"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 89,
+		"categoria": "Plan de Prevención",
+		"pregunta": "¿Cada cuánto tiempo debe revisarse y actualizarse la planificación de la actividad preventiva?",
+		"opciones": [
+			"Cada 5 años",
+			"Cuando se modifiquen las condiciones de trabajo o se detecten daños para la salud",
+			"Solo cuando lo ordene la Inspección de Trabajo",
+			"Cada 10 años"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 90,
+		"categoria": "Emergencias",
+		"pregunta": "¿Qué debe contener el plan de emergencia de una empresa?",
+		"opciones": [
+			"Solo el listado de teléfonos de emergencias externas",
+			"Los procedimientos de actuación ante emergencias, las personas responsables y los medios disponibles",
+			"Únicamente la ubicación de los extintores",
+			"Solo el plano del edificio"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 91,
+		"categoria": "Emergencias",
+		"pregunta": "¿Con qué periodicidad se recomienda realizar simulacros de evacuación en los centros de trabajo?",
+		"opciones": [
+			"Cada 10 años",
+			"Mensualmente",
+			"Solo cuando lo exija la autoridad competente",
+			"Al menos una vez al año"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 92,
+		"categoria": "Riesgos Eléctricos",
+		"pregunta": "¿Cuál es el principal factor que determina la gravedad de un accidente eléctrico?",
+		"opciones": [
+			"La intensidad de corriente que atraviesa el cuerpo humano",
+			"El voltaje de la instalación exclusivamente",
+			"El tipo de instalación (monofásica o trifásica)",
+			"El material del conductor"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 93,
+		"categoria": "Riesgos Eléctricos",
+		"pregunta": "¿Qué medida preventiva básica debe adoptarse antes de realizar trabajos de mantenimiento en instalaciones eléctricas?",
+		"opciones": [
+			"Colocar señales de advertencia",
+			"Avisar verbalmente a los compañeros",
+			"Usar guantes de látex convencionales",
+			"Aplicar las 5 reglas de oro del trabajo sin tensión (separar, bloquear, verificar, poner a tierra y señalizar)"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 94,
+		"categoria": "Manipulación Manual de Cargas",
+		"pregunta": "¿Cuál es la técnica correcta para levantar una carga del suelo manualmente?",
+		"opciones": [
+			"Doblar la espalda y levantar con los brazos extendidos",
+			"Girar el tronco mientras se levanta la carga",
+			"Levantar con un movimiento brusco para ganar impulso",
+			"Flexionar las rodillas, mantener la espalda recta y acercar la carga al cuerpo"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 95,
+		"categoria": "Manipulación Manual de Cargas",
+		"pregunta": "¿Qué normativa regula en España la manipulación manual de cargas?",
+		"opciones": [
+			"RD 773/1997",
+			"RD 486/1997",
+			"RD 487/1997",
+			"RD 664/1997"
+		],
+		"respuesta": 2
+	},
+	{
+		"id": 96,
+		"categoria": "Trabajadoras Embarazadas",
+		"pregunta": "¿Qué obligación tiene el empresario cuando una trabajadora embarazada está expuesta a riesgos para su salud o la del feto?",
+		"opciones": [
+			"Adaptar las condiciones de trabajo o cambiarla de puesto; si no es posible, iniciar la suspensión por riesgo durante el embarazo",
+			"Despedirla para proteger su salud",
+			"Reducir su salario como compensación",
+			"Enviarla a formación hasta que finalice el embarazo"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 97,
+		"categoria": "Trabajadoras Embarazadas",
+		"pregunta": "¿Cuál es la prestación económica que puede recibir una trabajadora en situación de riesgo durante el embarazo?",
+		"opciones": [
+			"El 60% de la base reguladora",
+			"El 100% de la base reguladora de la contingencia profesional",
+			"El 75% de la base reguladora",
+			"No existe prestación económica para este supuesto"
+		],
+		"respuesta": 1
+	},
+	{
+		"id": 98,
+		"categoria": "Subcontratación",
+		"pregunta": "En caso de subcontratación de obras o servicios, ¿qué obligación tiene la empresa principal respecto a la prevención de riesgos?",
+		"opciones": [
+			"Vigilar el cumplimiento de la normativa de prevención por parte de las empresas contratistas y subcontratistas",
+			"Ninguna, la responsabilidad es exclusiva de la empresa contratista",
+			"Solo informar a los trabajadores de la contratista sobre los riesgos",
+			"Responsabilizarse únicamente de los trabajadores propios"
+		],
+		"respuesta": 0
+	},
+	{
+		"id": 99,
+		"categoria": "Trabajo a Turnos",
+		"pregunta": "¿Qué medidas preventivas son recomendables para los trabajadores a turnos rotatorios?",
+		"opciones": [
+			"Rotar de turno de forma irregular y frecuente",
+			"Rotar en sentido antihorario para adaptarse mejor",
+			"Eliminar el turno de noche completamente",
+			"Establecer rotaciones en sentido horario (mañana-tarde-noche), con el menor número posible de noches consecutivas y descanso suficiente entre cambios de turno"
+		],
+		"respuesta": 3
+	},
+	{
+		"id": 100,
+		"categoria": "Cultura Preventiva",
+		"pregunta": "¿Qué se entiende por 'cultura preventiva' en una organización?",
+		"opciones": [
+			"El conjunto de valores, actitudes, percepciones y competencias que determinan el compromiso con la seguridad y salud, caracterizada por la comunicación y la participación activa",
+			"La obligación legal de cumplir con la normativa de PRL",
+			"El número de accidentes registrados en la empresa",
+			"La inversión económica destinada a equipos de protección"
+		],
+		"respuesta": 0
+	}
+]

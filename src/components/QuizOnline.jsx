@@ -1,12 +1,25 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+
+function formatearTiempo(segundos) {
+	if (segundos === null || segundos === undefined) return "";
+	const min = Math.floor(segundos / 60);
+	const seg = segundos % 60;
+	return `${min}:${seg.toString().padStart(2, "0")}`;
+}
 
 export default function QuizOnline({
 	socket,
 	preguntas,
 	nombre,
 	codigoSala,
+	timerConfig: timerConfigProp,
 	onVolverInicio,
 }) {
+	const timerConfig = timerConfigProp || {
+		activo: false,
+		tipo: null,
+		segundos: null,
+	};
 	const [indice, setIndice] = useState(0);
 	const [seleccion, setSeleccion] = useState(null);
 	const [aciertos, setAciertos] = useState(0);
@@ -16,6 +29,17 @@ export default function QuizOnline({
 	const [terminados, setTerminados] = useState(0);
 	const [totalJugadores, setTotalJugadores] = useState(0);
 	const [completo, setCompleto] = useState(false);
+	const [tiempoRestante, setTiempoRestante] = useState(null);
+
+	// Refs para acceso en callbacks del timer
+	const indiceRef = useRef(0);
+	const aciertosRef = useRef(0);
+	const respondidaRef = useRef(false);
+	const finalizadoRef = useRef(false);
+	indiceRef.current = indice;
+	aciertosRef.current = aciertos;
+	respondidaRef.current = respondida;
+	finalizadoRef.current = finalizado;
 
 	useEffect(() => {
 		if (!socket) return;
@@ -31,12 +55,82 @@ export default function QuizOnline({
 		return () => socket.off("ranking-actualizado", onRanking);
 	}, [socket]);
 
+	// --- TIMER EFFECTS ---
+
+	// Cuenta atrás
+	useEffect(() => {
+		if (
+			finalizado ||
+			!timerConfig.activo ||
+			tiempoRestante === null ||
+			tiempoRestante <= 0
+		)
+			return;
+		const id = setTimeout(() => setTiempoRestante((prev) => prev - 1), 1000);
+		return () => clearTimeout(id);
+	}, [tiempoRestante, finalizado, timerConfig.activo]);
+
+	// Por pregunta: reiniciar timer en cada pregunta nueva
+	useEffect(() => {
+		if (finalizado || !timerConfig.activo || timerConfig.tipo !== "pregunta")
+			return;
+		setTiempoRestante(timerConfig.segundos);
+	}, [indice, timerConfig, finalizado]);
+
+	// Por test: iniciar timer una sola vez
+	useEffect(() => {
+		if (!timerConfig.activo || timerConfig.tipo !== "test") return;
+		setTiempoRestante(timerConfig.segundos);
+	}, [timerConfig]);
+
+	// Timer llega a cero
+	useEffect(() => {
+		if (tiempoRestante !== 0 || !timerConfig.activo || finalizadoRef.current)
+			return;
+
+		if (timerConfig.tipo === "pregunta" && !respondidaRef.current) {
+			setRespondida(true);
+			const timeout = setTimeout(() => {
+				if (indiceRef.current + 1 < preguntas.length) {
+					setIndice((prev) => prev + 1);
+					setSeleccion(null);
+					setRespondida(false);
+				} else {
+					const porcentaje = Math.round(
+						(aciertosRef.current / preguntas.length) * 100,
+					);
+					setFinalizado(true);
+					socket.emit("enviar-resultado", {
+						aciertos: aciertosRef.current,
+						total: preguntas.length,
+						porcentaje,
+					});
+				}
+			}, 2000);
+			return () => clearTimeout(timeout);
+		}
+
+		if (timerConfig.tipo === "test") {
+			const currentAciertos = aciertosRef.current;
+			const porcentaje = Math.round((currentAciertos / preguntas.length) * 100);
+			setFinalizado(true);
+			socket.emit("enviar-resultado", {
+				aciertos: currentAciertos,
+				total: preguntas.length,
+				porcentaje,
+			});
+		}
+	}, [tiempoRestante, timerConfig, preguntas, socket]);
+
 	const preguntaActual = preguntas[indice];
 
 	function seleccionarOpcion(idx) {
 		if (respondida) return;
 		setSeleccion(idx);
 		setRespondida(true);
+		if (timerConfig.activo && timerConfig.tipo === "pregunta") {
+			setTiempoRestante(null);
+		}
 		if (idx === preguntaActual.respuesta) {
 			setAciertos((prev) => prev + 1);
 		}
@@ -154,7 +248,30 @@ export default function QuizOnline({
 				<span className="font-semibold text-green-700">
 					{aciertos} aciertos
 				</span>
+				{timerConfig.activo && tiempoRestante !== null && (
+					<>
+						{" "}
+						&middot;{" "}
+						<span
+							className={`font-mono font-bold ${
+								tiempoRestante <= (timerConfig.tipo === "pregunta" ? 5 : 30)
+									? "text-red-600 animate-pulse"
+									: tiempoRestante <=
+										  (timerConfig.tipo === "pregunta" ? 10 : 60)
+										? "text-orange-600"
+										: "text-gray-700"
+							}`}
+						>
+							⏱️ {formatearTiempo(tiempoRestante)}
+						</span>
+					</>
+				)}
 			</p>
+			{respondida && seleccion === null && tiempoRestante === 0 && (
+				<p className="text-center text-red-600 font-semibold mb-2">
+					⏱️ ¡Tiempo agotado!
+				</p>
+			)}
 			<div className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow">
 				<span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded mb-3">
 					{preguntaActual.categoria}

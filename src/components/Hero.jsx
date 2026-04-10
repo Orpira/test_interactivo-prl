@@ -1,5 +1,5 @@
 import React from "react";
-export default function Hero() {
+export default function Hero({ onContacto }) {
 	return (
 		<section className="min-h-screen flex flex-col justify-center items-center bg-gradient-to-br from-green-700 to-emerald-900 text-white p-6 text-center">
 			<h1 className="text-4xl md:text-5xl font-bold mb-4">
@@ -19,7 +19,9 @@ export default function Hero() {
 			<div className="mt-6 flex gap-4 underline">
 				<a href="#quiz">Test PRL</a>
 				<a href="#ranking">Ranking</a>
-				<a href="#contacto">Contacto</a>
+				<button onClick={onContacto} className="underline">
+					Contacto
+				</button>
 			</div>
 		</section>
 	);

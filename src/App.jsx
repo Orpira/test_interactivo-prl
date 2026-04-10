@@ -12,6 +12,7 @@ import useSocket from "./hooks/useSocket";
 export default function App() {
 	const [resultados, setResultados] = useState([]);
 	const [mostrarRanking, setMostrarRanking] = useState(false);
+	const [mostrarContacto, setMostrarContacto] = useState(false);
 
 	// Estado para modo en red
 	const [modoRed, setModoRed] = useState(false);
@@ -39,7 +40,7 @@ export default function App() {
 
 	return (
 		<div>
-			<Hero />
+			<Hero onContacto={() => setMostrarContacto(true)} />
 			<Features />
 
 			{/* Modo En Red: sala + quiz online */}
@@ -56,6 +57,7 @@ export default function App() {
 					preguntas={datosOnline.preguntas}
 					nombre={datosOnline.nombre}
 					codigoSala={datosOnline.codigoSala}
+					timerConfig={datosOnline.timerConfig}
 					onVolverInicio={volverInicio}
 				/>
 			)}
@@ -80,7 +82,9 @@ export default function App() {
 				</>
 			)}
 
-			<ContactForm />
+			{mostrarContacto && (
+				<ContactForm onClose={() => setMostrarContacto(false)} />
+			)}
 			<Footer />
 		</div>
 	);

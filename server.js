@@ -37,32 +37,40 @@ io.on("connection", (socket) => {
 	console.log(`Conectado: ${socket.id}`);
 
 	// Crear sala (profesor/anfitrión)
-	socket.on("crear-sala", ({ nombre, numPreguntas, categorias }, cb) => {
-		const codigo = generarCodigo();
-		const preguntasBase =
-			categorias && categorias.length > 0
-				? preguntas.filter((p) => categorias.includes(p.categoria))
-				: preguntas;
-		const preguntasSala = barajar(preguntasBase).slice(
-			0,
-			Math.min(numPreguntas, preguntasBase.length),
-		);
-		salas.set(codigo, {
-			host: socket.id,
-			numPreguntas: preguntasSala.length,
-			preguntas: preguntasSala,
-			jugadores: new Map(),
-			iniciado: false,
-			cerrada: false,
-		});
-		// El host también se une como jugador
-		const sala = salas.get(codigo);
-		sala.jugadores.set(socket.id, { nombre, resultado: null });
-		socket.join(codigo);
-		socket.data.sala = codigo;
-		cb({ ok: true, codigo, totalPreguntas: preguntasSala.length });
-		console.log(`Sala ${codigo} creada por ${nombre}`);
-	});
+	socket.on(
+		"crear-sala",
+		({ nombre, numPreguntas, categorias, timerConfig }, cb) => {
+			const codigo = generarCodigo();
+			const preguntasBase =
+				categorias && categorias.length > 0
+					? preguntas.filter((p) => categorias.includes(p.categoria))
+					: preguntas;
+			const preguntasSala = barajar(preguntasBase).slice(
+				0,
+				Math.min(numPreguntas, preguntasBase.length),
+			);
+			salas.set(codigo, {
+				host: socket.id,
+				numPreguntas: preguntasSala.length,
+				preguntas: preguntasSala,
+				jugadores: new Map(),
+				iniciado: false,
+				cerrada: false,
+				timerConfig: timerConfig || {
+					activo: false,
+					tipo: null,
+					segundos: null,
+				},
+			});
+			// El host también se une como jugador
+			const sala = salas.get(codigo);
+			sala.jugadores.set(socket.id, { nombre, resultado: null });
+			socket.join(codigo);
+			socket.data.sala = codigo;
+			cb({ ok: true, codigo, totalPreguntas: preguntasSala.length });
+			console.log(`Sala ${codigo} creada por ${nombre}`);
+		},
+	);
 
 	// Unirse a sala
 	socket.on("unirse-sala", ({ codigo, nombre }, cb) => {
@@ -95,7 +103,10 @@ io.on("connection", (socket) => {
 
 		sala.iniciado = true;
 		// Enviar preguntas a todos los de la sala
-		io.to(codigo).emit("test-iniciado", { preguntas: sala.preguntas });
+		io.to(codigo).emit("test-iniciado", {
+			preguntas: sala.preguntas,
+			timerConfig: sala.timerConfig,
+		});
 		cb?.({ ok: true });
 		console.log(`Test iniciado en sala ${codigo}`);
 	});

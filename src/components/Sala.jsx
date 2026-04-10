@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import CategorySelector from "./CategorySelector";
 
 export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 	const [fase, setFase] = useState("elegir"); // "elegir" | "crear" | "unirse" | "esperando"
@@ -11,6 +12,8 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 	const [error, setError] = useState("");
 	const [todasPreguntas, setTodasPreguntas] = useState([]);
 	const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
+	const [timerTipo, setTimerTipo] = useState("ninguno");
+	const [timerSegundos, setTimerSegundos] = useState(30);
 
 	// Cargar preguntas para extraer categorías
 	useEffect(() => {
@@ -37,8 +40,13 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 			setJugadores(lista);
 		}
 
-		function onTestInicio({ preguntas }) {
-			onTestIniciado({ preguntas, codigoSala, nombre: nombre.trim() });
+		function onTestInicio({ preguntas, timerConfig }) {
+			onTestIniciado({
+				preguntas,
+				codigoSala,
+				nombre: nombre.trim(),
+				timerConfig,
+			});
 		}
 
 		function onEresHost() {
@@ -66,6 +74,10 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 				nombre: nombre.trim(),
 				numPreguntas,
 				categorias: categoriasSeleccionadas,
+				timerConfig:
+					timerTipo !== "ninguno"
+						? { activo: true, tipo: timerTipo, segundos: timerSegundos }
+						: { activo: false, tipo: null, segundos: null },
 			},
 			(res) => {
 				if (res.ok) {
@@ -174,38 +186,53 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 					<label className="text-sm text-gray-600 text-left mt-2">
 						Categorías (opcional):
 					</label>
-					<div className="flex flex-wrap gap-2 justify-center">
-						{categoriasDisponibles.map((cat) => {
-							const activa = categoriasSeleccionadas.includes(cat);
-							const count = todasPreguntas.filter(
-								(p) => p.categoria === cat,
-							).length;
-							return (
-								<button
-									key={cat}
-									type="button"
-									onClick={() => toggleCategoria(cat)}
-									className={`px-2 py-1 rounded-full text-xs font-medium transition border ${
-										activa
-											? "bg-green-700 text-white border-green-700"
-											: "bg-white text-gray-700 border-gray-300 hover:border-green-500"
-									}`}
-								>
-									{cat} ({count})
-								</button>
-							);
-						})}
-					</div>
-					{categoriasSeleccionadas.length > 0 && (
-						<p className="text-green-700 text-sm font-semibold">
-							{
-								todasPreguntas.filter((p) =>
-									categoriasSeleccionadas.includes(p.categoria),
-								).length
-							}{" "}
-							preguntas disponibles en {categoriasSeleccionadas.length}{" "}
-							categoría{categoriasSeleccionadas.length > 1 ? "s" : ""}
-						</p>
+					<CategorySelector
+						preguntas={todasPreguntas}
+						seleccionadas={categoriasSeleccionadas}
+						onChange={setCategoriasSeleccionadas}
+						compacto
+					/>
+					<label className="text-sm text-gray-600 text-left mt-2">
+						Temporizador (opcional):
+					</label>
+					<select
+						value={timerTipo}
+						onChange={(e) => {
+							setTimerTipo(e.target.value);
+							if (e.target.value === "pregunta") setTimerSegundos(30);
+							if (e.target.value === "test") setTimerSegundos(600);
+						}}
+						className="p-3 border rounded-lg text-center text-lg"
+					>
+						<option value="ninguno">Sin temporizador</option>
+						<option value="pregunta">Por pregunta</option>
+						<option value="test">Por test completo</option>
+					</select>
+					{timerTipo === "pregunta" && (
+						<select
+							value={timerSegundos}
+							onChange={(e) => setTimerSegundos(Number(e.target.value))}
+							className="p-3 border rounded-lg text-center text-lg"
+						>
+							{[15, 30, 45, 60].map((s) => (
+								<option key={s} value={s}>
+									{s} segundos por pregunta
+								</option>
+							))}
+						</select>
+					)}
+					{timerTipo === "test" && (
+						<select
+							value={timerSegundos}
+							onChange={(e) => setTimerSegundos(Number(e.target.value))}
+							className="p-3 border rounded-lg text-center text-lg"
+						>
+							{[300, 600, 900, 1200].map((s) => (
+								<option key={s} value={s}>
+									{s / 60} minutos
+								</option>
+							))}
+						</select>
 					)}
 					{error && <p className="text-red-600 text-sm">{error}</p>}
 					<button

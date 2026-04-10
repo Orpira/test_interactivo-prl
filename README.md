@@ -15,6 +15,8 @@ Plataforma web interactiva para la formación y evaluación en **Prevención de 
 - [Flujo de uso](#flujo-de-uso)
 - [Banco de preguntas](#banco-de-preguntas)
 - [Futuras funcionalidades](#futuras-funcionalidades)
+- [Scripts disponibles](#scripts-disponibles)
+- [Arquitectura de comunicación en red](#arquitectura-de-comunicación-en-red)
 - [Licencia](#licencia)
 
 ---
@@ -32,13 +34,15 @@ Plataforma web interactiva para la formación y evaluación en **Prevención de 
 ### Funcionalidades principales
 
 - **100 preguntas** distribuidas en **32 categorías temáticas** de PRL
-- **Selección de categorías**: el usuario puede filtrar por temas específicos o usar todas
+- **Selección de categorías por grupos**: 32 categorías organizadas en **7 grupos temáticos** (Legislación, Organización Preventiva, Evaluación y Vigilancia, Tipos de Riesgos, Protección y Entorno, Emergencias, Colectivos Especiales) con búsqueda, selección grupal y conteo de preguntas
 - **Cantidad configurable**: elegir cuántas preguntas responder (5, 10, 15, 20 o todas las disponibles)
 - **Aleatorización**: las preguntas se barajan en cada intento (Fisher-Yates shuffle)
 - **Distribución equilibrada**: las respuestas correctas están balanceadas 25/25/25/25 entre A, B, C y D
 - **Retroalimentación inmediata**: se indica la respuesta correcta tras cada selección
 - **Sistema de ranking**: clasificación con medallas (🥇🥈🥉) ordenada por porcentaje de aciertos
 - **Modo aula en red**: creación de salas con código (PRL-XXXX), ranking en tiempo real conforme los participantes terminan
+- **Temporizador opcional**: el usuario elige jugar sin límite de tiempo, con temporizador por pregunta (15/30/45/60s) o por test completo (5/10/15/20 min). Si se agota el tiempo por pregunta, se muestra la respuesta correcta y se avanza automáticamente. Si se agota el tiempo total, el test se finaliza con la puntuación acumulada
+- **Reconexión automática**: WebSocket con fallback a polling y reconexión transparente
 
 ---
 
@@ -46,19 +50,20 @@ Plataforma web interactiva para la formación y evaluación en **Prevención de 
 
 ### Frontend
 
-| Herramienta                              | Versión | Uso                                                  |
-| ---------------------------------------- | ------- | ---------------------------------------------------- |
-| [React](https://react.dev/)              | 19.1    | Biblioteca de UI, componentes funcionales con hooks  |
-| [Vite](https://vite.dev/)                | 6.3     | Bundler y servidor de desarrollo con HMR             |
-| [Tailwind CSS](https://tailwindcss.com/) | 3.4     | Framework de utilidades CSS para estilos responsivos |
-| [PostCSS](https://postcss.org/)          | —       | Procesamiento CSS (autoprefixer + Tailwind)          |
+| Herramienta                              | Versión   | Uso                                                  |
+| ---------------------------------------- | --------- | ---------------------------------------------------- |
+| [React](https://react.dev/)              | 19.1      | Biblioteca de UI, componentes funcionales con hooks  |
+| [Vite](https://vite.dev/)                | 6.3       | Bundler y servidor de desarrollo con HMR             |
+| [Tailwind CSS](https://tailwindcss.com/) | 3.4 / 4.1 | Framework de utilidades CSS para estilos responsivos |
+| [PostCSS](https://postcss.org/)          | —         | Procesamiento CSS (autoprefixer + Tailwind)          |
 
 ### Backend (modo en red)
 
-| Herramienta                       | Versión | Uso                                                   |
-| --------------------------------- | ------- | ----------------------------------------------------- |
-| [Express](https://expressjs.com/) | 5.2     | Servidor HTTP para Socket.IO                          |
-| [Socket.IO](https://socket.io/)   | 4.8     | Comunicación bidireccional en tiempo real (WebSocket) |
+| Herramienta                            | Versión | Uso                                                   |
+| -------------------------------------- | ------- | ----------------------------------------------------- |
+| [Express](https://expressjs.com/)      | 5.2     | Servidor HTTP para Socket.IO                          |
+| [Socket.IO](https://socket.io/)        | 4.8     | Comunicación bidireccional en tiempo real (WebSocket) |
+| [Socket.IO Client](https://socket.io/) | 4.8     | Cliente WebSocket para el frontend                    |
 
 ### Lenguaje
 
@@ -75,9 +80,12 @@ eduapp-home/
 ├── vite.config.js              # Configuración de Vite (proxy WebSocket)
 ├── tailwind.config.js          # Configuración de Tailwind CSS
 ├── postcss.config.js           # PostCSS plugins
+├── postcss.config.cjs          # PostCSS plugins (CommonJS)
 ├── server.js                   # Servidor Express + Socket.IO (modo en red)
 ├── public/
-│   └── preguntas-prl.json      # Banco de 100 preguntas PRL
+│   ├── preguntas-prl.json      # Banco principal de 100 preguntas PRL
+│   ├── preguntas-prl-100.json  # Banco ampliado (100 preguntas)
+│   └── preguntas-prl-15.json   # Banco reducido (15 preguntas, demos)
 └── src/
     ├── main.jsx                # Punto de entrada React
     ├── index.css               # Estilos globales (Tailwind directives)
@@ -87,6 +95,7 @@ eduapp-home/
     └── components/
         ├── Hero.jsx            # Sección hero con branding PRL
         ├── Features.jsx        # Tarjetas de características
+        ├── CategorySelector.jsx# Selector visual de categorías por grupos
         ├── PreviewEditor.jsx   # Quiz local (individual + multijugador turnos)
         ├── Sala.jsx            # Gestión de salas en red (crear/unirse)
         ├── QuizOnline.jsx      # Quiz en red con ranking en tiempo real
@@ -164,14 +173,16 @@ Los participantes se conectan a `http://<IP-del-profesor>:5173` desde sus navega
 
 ```
 Seleccionar modo → Introducir nombre → Elegir categorías (opcional)
-→ Elegir cantidad de preguntas → Responder test → Ver resultado → Ver ranking
+→ Elegir cantidad de preguntas → Configurar temporizador (opcional)
+→ Responder test → Ver resultado → Ver ranking
 ```
 
 ### Modo Multijugador Local
 
 ```
 Seleccionar modo → Definir nº de jugadores → Jugador 1: nombre → categorías
-→ cantidad → test → resultado → Jugador 2: nombre → test → ... → Ranking final
+→ cantidad → temporizador (opcional) → test → resultado
+→ Jugador 2: nombre → test → ... → Ranking final
 ```
 
 ### Modo En Red
@@ -179,22 +190,36 @@ Seleccionar modo → Definir nº de jugadores → Jugador 1: nombre → categor�
 **Anfitrión (docente):**
 
 ```
-En Red → Crear sala → Nombre + nº preguntas + categorías → Compartir código
-→ Esperar jugadores → Iniciar test → Ver ranking en tiempo real
+En Red → Crear sala → Nombre + nº preguntas + categorías + temporizador (opcional)
+→ Compartir código → Esperar jugadores → Iniciar test → Ver ranking en tiempo real
 ```
 
 **Participantes (alumnos):**
 
 ```
 En Red → Unirse a sala → Nombre + código → Esperar inicio
-→ Responder test → Ver ranking en tiempo real
+→ Responder test (con temporizador si el anfitrión lo configuró) → Ver ranking en tiempo real
 ```
 
 ---
 
 ## Banco de preguntas
 
-El archivo `public/preguntas-prl.json` contiene **100 preguntas** en **32 categorías**:
+El archivo principal `public/preguntas-prl.json` contiene **100 preguntas** en **32 categorías**. Además se incluyen variantes: `preguntas-prl-100.json` (banco ampliado) y `preguntas-prl-15.json` (banco reducido para demos).
+
+### Categorías organizadas en 7 grupos
+
+| Grupo                            | Emoji | Categorías incluidas                                                                                                     |
+| -------------------------------- | ----- | ------------------------------------------------------------------------------------------------------------------------ |
+| Legislación y Normativa          | ⚖️    | Ley 31/1995 LPRL, Responsabilidades y Sanciones, Subcontratación                                                         |
+| Organización Preventiva          | 🏛️    | Plan de Prevención, Servicios de Prevención, Comité de Seguridad, Delegados, Coordinación, Formación, Cultura Preventiva |
+| Evaluación y Vigilancia          | 🔍    | Evaluación de Riesgos, Vigilancia de la Salud, Accidente de Trabajo, Enfermedades Profesionales, Riesgos Laborales       |
+| Tipos de Riesgos                 | ⚠️    | Físicos, Químicos, Biológicos, Ergonómicos, Psicosociales, Eléctricos                                                    |
+| Protección y Entorno             | 🛡️    | Equipos de Protección, Señalización, Lugares de Trabajo, Manipulación Manual de Cargas                                   |
+| Emergencias y Primeros Auxilios  | 🚨    | Emergencias, Incendios, Primeros Auxilios                                                                                |
+| Colectivos y Trabajos Especiales | 👷    | Trabajadoras Embarazadas, Trabajos Especiales, Construcción, Trabajo a Turnos                                            |
+
+### Distribución de preguntas por categoría
 
 | Categoría                     | Preguntas |
 | ----------------------------- | --------- |
@@ -257,7 +282,6 @@ El archivo `public/preguntas-prl.json` contiene **100 preguntas** en **32 catego
 
 ### Corto plazo
 
-- ⏱️ **Temporizador** por pregunta o por test completo
 - 📊 **Panel de administración** para que el docente suba, edite y elimine preguntas desde la interfaz
 - 📄 **Exportación de resultados** en PDF y CSV con detalle por alumno
 - 🔢 **Ampliación del banco de preguntas** a 500+
@@ -286,6 +310,26 @@ El archivo `public/preguntas-prl.json` contiene **100 preguntas** en **32 catego
 | `dev`      | `npm run dev`      | Inicia servidor Vite (solo frontend)               |
 | `server`   | `npm run server`   | Inicia servidor Express + Socket.IO en puerto 3001 |
 | `dev:full` | `npm run dev:full` | Inicia ambos servidores simultáneamente            |
+
+---
+
+## Arquitectura de comunicación en red
+
+### Eventos WebSocket
+
+| Evento (cliente → servidor) | Datos                                             | Descripción                          |
+| --------------------------- | ------------------------------------------------- | ------------------------------------ |
+| `crear-sala`                | `{nombre, numPreguntas, categorias, timerConfig}` | Crea sala con código PRL-XXXX        |
+| `unirse-sala`               | `{codigo, nombre}`                                | Unirse a sala existente              |
+| `iniciar-test`              | —                                                 | Solo host: inicia el test para todos |
+| `enviar-resultado`          | `{aciertos, total, porcentaje}`                   | Envía resultado al terminar          |
+
+| Evento (servidor → cliente) | Datos                                             | Descripción                        |
+| --------------------------- | ------------------------------------------------- | ---------------------------------- |
+| `jugadores-actualizados`    | `[nombres]`                                       | Lista de jugadores en la sala      |
+| `test-iniciado`             | `{preguntas, timerConfig}`                        | Preguntas barajadas para todos     |
+| `eres-host`                 | —                                                 | Notifica al creador de la sala     |
+| `ranking-actualizado`       | `{ranking, terminados, totalJugadores, completo}` | Ranking en vivo mientras finalizan |
 
 ---
 
