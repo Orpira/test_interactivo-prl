@@ -407,18 +407,6 @@
     "respuesta": 1
   },
   {
-    "id": 35,
-    "categoria": "Incendios",
-    "pregunta": "¿Qué elemento del triángulo del fuego representa el material que arde?",
-    "opciones": [
-      "Comburente",
-      "Fuente de calor",
-      "Combustible",
-      "Oxígeno"
-    ],
-    "respuesta": 2
-  },
-  {
     "id": 36,
     "categoria": "Riesgos Ergonómicos",
     "pregunta": "¿Cuál de los siguientes factores contribuye a la ergonomía en el puesto de trabajo?",
@@ -465,18 +453,6 @@
       "Verde"
     ],
     "respuesta": 2
-  },
-  {
-    "id": 40,
-    "categoria": "Riesgos Laborales",
-    "pregunta": "¿Qué práctica reduce el riesgo de accidentes en el lugar de trabajo?",
-    "opciones": [
-      "Aumentar el ritmo de trabajo",
-      "Mantener orden y limpieza",
-      "Reducir pausas",
-      "Evitar señalización"
-    ],
-    "respuesta": 1
   },
   {
     "id": 41,
@@ -1137,30 +1113,6 @@
       "Señal verde"
     ],
     "respuesta": 2
-  },
-  {
-    "id": 96,
-    "categoria": "Incendios",
-    "pregunta": "¿Qué elemento del triángulo del fuego representa el material que arde?",
-    "opciones": [
-      "Comburente",
-      "Fuente de calor",
-      "Combustible",
-      "Oxígeno"
-    ],
-    "respuesta": 2
-  },
-  {
-    "id": 97,
-    "categoria": "Incendios",
-    "pregunta": "¿Qué elemento es obligatorio en muchas empresas para luchar contra incendios incipientes?",
-    "opciones": [
-      "Botiquín",
-      "Extintor",
-      "Arnés",
-      "Guantes"
-    ],
-    "respuesta": 1
   },
   {
     "id": 98,
