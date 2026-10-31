@@ -5,6 +5,18 @@ import { ESTILOS_SENAL } from "./utils/estilosSenal.js";
 
 const { colors: colores, fontFamily: fuentes } = configuracion.theme.extend;
 
+describe("favicon", () => {
+	it("el icono enlazado en index.html existe y usa los colores de la marca", () => {
+		const html = readFileSync(new URL("../index.html", import.meta.url), "utf8");
+		const ruta = html.match(/<link rel="icon" href="\/([^"]+)"/)?.[1];
+		expect(ruta).toBe("favicon.svg");
+		const svg = readFileSync(new URL(`../public/${ruta}`, import.meta.url), "utf8");
+		for (const color of [colores.primary.DEFAULT, colores.signal.DEFAULT, colores.ink.DEFAULT]) {
+			expect(svg.toUpperCase()).toContain(color.toUpperCase());
+		}
+	});
+});
+
 function luminancia(hex) {
 	const rgb = hex.slice(1).match(/../g).map((canal) => {
 		const valor = parseInt(canal, 16) / 255;

@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="PRL Master">
+  <rect width="64" height="64" rx="14" fill="#0F766E"/>
+  <polygon points="32,8 58,54 6,54" fill="#10201D" stroke="#10201D" stroke-width="4" stroke-linejoin="round"/>
+  <polygon points="32,15 51,49 13,49" fill="#FACC15"/>
+  <path d="M32 24v14" stroke="#10201D" stroke-width="5" stroke-linecap="round"/>
+  <circle cx="32" cy="44" r="3" fill="#10201D"/>
+</svg>
