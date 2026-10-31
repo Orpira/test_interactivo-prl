@@ -1,4 +1,5 @@
 import React from "react";
+import { Trophy } from "lucide-react";
 export default function RankingSummary({ resultados, onNuevo }) {
 	const ranking = [...resultados].sort((a, b) => {
 		if (b.porcentaje !== a.porcentaje) return b.porcentaje - a.porcentaje;
@@ -6,15 +7,19 @@ export default function RankingSummary({ resultados, onNuevo }) {
 	});
 
 	return (
-		<section id="ranking" className="p-6 bg-white">
-			<h2 className="text-2xl font-bold mb-4 text-center">🏆 Ranking PRL</h2>
-			<p className="text-center text-gray-500 mb-4">
+		<section id="ranking" className="p-6 md:p-12 bg-bg text-ink">
+			<h2 className="text-4xl font-display mb-4 text-center inline-flex items-center justify-center gap-3 w-full">
+				<Trophy aria-hidden="true" size={20} strokeWidth={1.75} />
+				Ranking PRL
+			</h2>
+			<p className="text-center text-ink-muted mb-4">
 				Resultados de la sesión — {resultados.length} participante
 				{resultados.length !== 1 && "s"}
 			</p>
-			<table className="w-full max-w-xl mx-auto border">
+			<div className="w-full max-w-xl mx-auto overflow-x-auto border border-line rounded-xl bg-card">
+			<table className="w-full">
 				<thead>
-					<tr className="bg-green-100">
+					<tr className="bg-surface">
 						<th className="p-2 text-left">#</th>
 						<th className="p-2 text-left">Nombre</th>
 						<th className="p-2 text-right">Aciertos</th>
@@ -25,24 +30,25 @@ export default function RankingSummary({ resultados, onNuevo }) {
 					{ranking.map((r, i) => (
 						<tr
 							key={i}
-							className={`border-t ${i === 0 ? "bg-yellow-50 font-bold" : ""}`}
+							className={`border-t border-line ${i === 0 ? "bg-surface font-bold" : ""}`}
 						>
-							<td className="p-2 font-bold">
+							<td className="p-2 font-mono font-bold">
 								{i === 0 ? "🥇" : i === 1 ? "🥈" : i === 2 ? "🥉" : i + 1}
 							</td>
 							<td className="p-2">{r.nombre}</td>
-							<td className="p-2 text-right">
+							<td className="p-2 text-right font-mono">
 								{r.aciertos}/{r.total}
 							</td>
-							<td className="p-2 text-right font-semibold">{r.porcentaje}%</td>
+							<td className="p-2 text-right font-mono font-semibold">{r.porcentaje}%</td>
 						</tr>
 					))}
 				</tbody>
 			</table>
+			</div>
 			<div className="text-center mt-6">
 				<button
 					onClick={onNuevo}
-					className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-800 transition"
+					className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
 				>
 					Nueva sesión
 				</button>

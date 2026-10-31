@@ -1,5 +1,13 @@
 import React, { useState, useEffect, useRef } from "react";
 import CategorySelector from "./CategorySelector";
+import {
+	Globe,
+	Timer,
+	Trophy,
+	UserRound,
+	UsersRound,
+} from "lucide-react";
+import { prepararTest } from "../utils/quiz.js";
 
 function formatearTiempo(segundos) {
 	if (segundos === null || segundos === undefined) return "";
@@ -8,32 +16,23 @@ function formatearTiempo(segundos) {
 	return `${min}:${seg.toString().padStart(2, "0")}`;
 }
 
-function barajar(arr) {
-	const copia = [...arr];
-	for (let i = copia.length - 1; i > 0; i--) {
-		const j = Math.floor(Math.random() * (i + 1));
-		[copia[i], copia[j]] = [copia[j], copia[i]];
-	}
-	return copia;
-}
-
 export default function QuizPRL({
 	onResultado,
 	resultados,
-	mostrarRanking,
 	setMostrarRanking,
 	onModoRed,
 	socketConectado,
+	conexionComprobada,
 }) {
 	const [todasPreguntas, setTodasPreguntas] = useState([]);
 	const [cargando, setCargando] = useState(true);
+	const [errorCarga, setErrorCarga] = useState("");
 
 	// Fase de configuración
 	const [modo, setModo] = useState(null); // "individual" | "multijugador"
 	const [totalJugadores, setTotalJugadores] = useState(2);
 	const [jugadorActualIdx, setJugadorActualIdx] = useState(0);
 	const [nombreUsuario, setNombreUsuario] = useState("");
-	const [cantidadPreguntas, setCantidadPreguntas] = useState(null);
 	const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
 
 	// Fase de test
@@ -43,7 +42,6 @@ export default function QuizPRL({
 	const [aciertos, setAciertos] = useState(0);
 	const [respondida, setRespondida] = useState(false);
 	const [finalizado, setFinalizado] = useState(false);
-	const [iniciado, setIniciado] = useState(false);
 
 	// Timer
 	const [timerConfig, setTimerConfig] = useState({
@@ -52,6 +50,7 @@ export default function QuizPRL({
 		segundos: null,
 	});
 	const [tiempoRestante, setTiempoRestante] = useState(null);
+	const timeoutProgresoRef = useRef(null);
 
 	// Refs para acceso en callbacks del timer
 	const indiceRef = useRef(0);
@@ -61,13 +60,30 @@ export default function QuizPRL({
 	aciertosRef.current = aciertos;
 	respondidaRef.current = respondida;
 
+	function cancelarProgresoPendiente() {
+		if (timeoutProgresoRef.current !== null) {
+			clearTimeout(timeoutProgresoRef.current);
+			timeoutProgresoRef.current = null;
+		}
+	}
+
+	function reiniciarTurno() {
+		cancelarProgresoPendiente();
+		setIndice(0);
+		indiceRef.current = 0;
+		setSeleccion(null);
+		setAciertos(0);
+		aciertosRef.current = 0;
+		setRespondida(false);
+		respondidaRef.current = false;
+		setFinalizado(false);
+		setTiempoRestante(null);
+	}
+
+	useEffect(() => () => cancelarProgresoPendiente(), []);
+
 	// Fases: "modo" → "config" → "nombre" → "categorias" → "cantidad" → "timer" → "test" → "resultado"
 	const [fase, setFase] = useState("modo");
-
-	// Categorías disponibles (extraídas del JSON)
-	const categoriasDisponibles = [
-		...new Set(todasPreguntas.map((p) => p.categoria)),
-	].sort();
 
 	// Preguntas filtradas por categorías seleccionadas
 	const preguntasFiltradas =
@@ -78,13 +94,25 @@ export default function QuizPRL({
 			: todasPreguntas;
 
 	useEffect(() => {
-		fetch("/preguntas-prl.json")
-			.then((res) => res.json())
+		const controlador = new AbortController();
+		fetch("/preguntas-prl.json", { signal: controlador.signal })
+			.then((res) => {
+				if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+				return res.json();
+			})
 			.then((data) => {
+				if (!Array.isArray(data) || data.length === 0) {
+					throw new Error("El banco de preguntas está vacío o no es válido");
+				}
 				setTodasPreguntas(data);
 				setCargando(false);
 			})
-			.catch(() => setCargando(false));
+			.catch((error) => {
+				if (controlador.signal.aborted) return;
+				setErrorCarga(`No se pudieron cargar las preguntas: ${error.message}`);
+				setCargando(false);
+			});
+		return () => controlador.abort();
 	}, []);
 
 	const opcionesCantidad = [5, 10, 15, 20].filter(
@@ -136,11 +164,15 @@ export default function QuizPRL({
 
 		if (timerConfig.tipo === "pregunta" && !respondidaRef.current) {
 			setRespondida(true);
-			const timeout = setTimeout(() => {
+			respondidaRef.current = true;
+			timeoutProgresoRef.current = setTimeout(() => {
+				timeoutProgresoRef.current = null;
 				if (indiceRef.current + 1 < preguntas.length) {
 					setIndice((prev) => prev + 1);
+					indiceRef.current += 1;
 					setSeleccion(null);
 					setRespondida(false);
+					respondidaRef.current = false;
 				} else {
 					const porcentaje = Math.round(
 						(aciertosRef.current / preguntas.length) * 100,
@@ -155,7 +187,7 @@ export default function QuizPRL({
 					setFase("resultado");
 				}
 			}, 2000);
-			return () => clearTimeout(timeout);
+			return cancelarProgresoPendiente;
 		}
 
 		if (timerConfig.tipo === "test") {
@@ -181,7 +213,7 @@ export default function QuizPRL({
 
 	function seleccionarModo(m) {
 		setModo(m);
-		setFase("config");
+		setFase(m === "individual" ? "nombre" : "config");
 	}
 
 	function confirmarConfigMultijugador(e) {
@@ -193,13 +225,12 @@ export default function QuizPRL({
 	function confirmarNombre(e) {
 		e.preventDefault();
 		if (!nombreUsuario.trim()) return;
+		if (modo === "multijugador" && jugadorActualIdx > 0) {
+			reiniciarTurno();
+			setFase("test");
+			return;
+		}
 		setFase("categorias");
-	}
-
-	function toggleCategoria(cat) {
-		setCategoriasSeleccionadas((prev) =>
-			prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
-		);
 	}
 
 	function confirmarCategorias() {
@@ -207,20 +238,14 @@ export default function QuizPRL({
 	}
 
 	function confirmarCantidad(num) {
-		const seleccionadas = barajar(preguntasFiltradas).slice(0, num);
+		const seleccionadas = prepararTest(preguntasFiltradas, num);
 		setPreguntas(seleccionadas);
-		setCantidadPreguntas(num);
 		setFase("timer");
 	}
 
 	function iniciarTestConTimer(config) {
+		reiniciarTurno();
 		setTimerConfig(config);
-		setIndice(0);
-		setSeleccion(null);
-		setAciertos(0);
-		setRespondida(false);
-		setFinalizado(false);
-		setIniciado(true);
 		setFase("test");
 	}
 
@@ -228,26 +253,25 @@ export default function QuizPRL({
 		if (respondida) return;
 		setSeleccion(idx);
 		setRespondida(true);
+		respondidaRef.current = true;
 		if (timerConfig.activo && timerConfig.tipo === "pregunta") {
 			setTiempoRestante(null);
 		}
 		if (idx === preguntas[indice].respuesta) {
 			setAciertos((prev) => prev + 1);
+			aciertosRef.current += 1;
 		}
 	}
 
 	function siguiente() {
 		if (indice + 1 < preguntas.length) {
 			setIndice((prev) => prev + 1);
+			indiceRef.current += 1;
 			setSeleccion(null);
 			setRespondida(false);
+			respondidaRef.current = false;
 		} else {
 			setFinalizado(true);
-			const porcentaje = Math.round(
-				((aciertos + (seleccion === preguntas[indice].respuesta ? 0 : 0)) /
-					preguntas.length) *
-					100,
-			);
 			onResultado({
 				nombre: nombreUsuario.trim(),
 				aciertos,
@@ -261,6 +285,7 @@ export default function QuizPRL({
 	function siguienteJugador() {
 		const nextIdx = jugadorActualIdx + 1;
 		if (modo === "multijugador" && nextIdx < totalJugadores) {
+			reiniciarTurno();
 			setJugadorActualIdx(nextIdx);
 			setNombreUsuario("");
 			setFase("nombre");
@@ -275,7 +300,6 @@ export default function QuizPRL({
 		setTotalJugadores(2);
 		setJugadorActualIdx(0);
 		setNombreUsuario("");
-		setCantidadPreguntas(null);
 		setCategoriasSeleccionadas([]);
 		setPreguntas([]);
 		setIndice(0);
@@ -283,7 +307,10 @@ export default function QuizPRL({
 		setAciertos(0);
 		setRespondida(false);
 		setFinalizado(false);
-		setIniciado(false);
+		indiceRef.current = 0;
+		aciertosRef.current = 0;
+		respondidaRef.current = false;
+		cancelarProgresoPendiente();
 		setTimerConfig({ activo: false, tipo: null, segundos: null });
 		setTiempoRestante(null);
 		setFase("modo");
@@ -293,7 +320,7 @@ export default function QuizPRL({
 
 	if (cargando) {
 		return (
-			<section id="quiz" className="bg-gray-100 p-6 text-center">
+			<section id="quiz" className="bg-bg p-6 text-center text-ink">
 				<p className="text-lg">Cargando preguntas…</p>
 			</section>
 		);
@@ -301,9 +328,10 @@ export default function QuizPRL({
 
 	if (todasPreguntas.length === 0) {
 		return (
-			<section id="quiz" className="bg-gray-100 p-6 text-center">
-				<p className="text-lg text-red-600">
-					No se pudieron cargar las preguntas.
+			<section id="quiz" className="bg-bg p-6 text-center text-ink">
+				<p role="alert" className="text-lg text-ko">
+					{errorCarga || "No hay preguntas disponibles."} Recarga la página para
+					volver a intentarlo.
 				</p>
 			</section>
 		);
@@ -312,33 +340,38 @@ export default function QuizPRL({
 	// Fase: Elegir modo
 	if (fase === "modo") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-2xl font-bold mb-2">Test de PRL</h2>
-				<p className="text-gray-500 mb-6">Selecciona la modalidad</p>
+			<section id="quiz" className="bg-bg px-6 py-16 text-center text-ink">
+				<p className="font-mono text-xs uppercase tracking-[0.2em] text-ink-muted mb-3">
+					PRL Master
+				</p>
+				<h2 className="text-4xl font-display mb-2">Elige cómo jugar</h2>
+				<p className="text-ink-muted mb-8">Selecciona la modalidad</p>
 				<div className="flex flex-wrap justify-center gap-4">
 					<button
 						onClick={() => seleccionarModo("individual")}
-						className="bg-green-700 text-white px-6 py-4 rounded-xl font-semibold hover:bg-green-800 transition text-lg flex flex-col items-center gap-1"
+						className="min-w-40 border border-line bg-card text-ink px-6 py-5 rounded-xl font-semibold hover:bg-surface hover:border-primary transition text-lg flex flex-col items-center gap-2"
 					>
-						<span className="text-3xl">👤</span>
+						<UserRound aria-hidden="true" size={20} strokeWidth={1.75} />
 						Individual
 					</button>
 					<button
 						onClick={() => seleccionarModo("multijugador")}
-						className="bg-indigo-700 text-white px-6 py-4 rounded-xl font-semibold hover:bg-indigo-800 transition text-lg flex flex-col items-center gap-1"
+						className="min-w-40 border border-line bg-card text-ink px-6 py-5 rounded-xl font-semibold hover:bg-surface hover:border-primary transition text-lg flex flex-col items-center gap-2"
 					>
-						<span className="text-3xl">👥</span>
+						<UsersRound aria-hidden="true" size={20} strokeWidth={1.75} />
 						Multijugador
 					</button>
 					<button
 						onClick={onModoRed}
 						disabled={!socketConectado}
-						className="bg-blue-700 text-white px-6 py-4 rounded-xl font-semibold hover:bg-blue-800 transition text-lg flex flex-col items-center gap-1 disabled:opacity-40"
+						className="min-w-40 border border-line bg-card text-ink px-6 py-5 rounded-xl font-semibold hover:bg-surface hover:border-primary transition text-lg flex flex-col items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
 					>
-						<span className="text-3xl">🌐</span>
+						<Globe aria-hidden="true" size={20} strokeWidth={1.75} />
 						En Red
 						{!socketConectado && (
-							<span className="text-xs font-normal">(sin conexión)</span>
+							<span className="text-xs font-normal text-ink-muted">
+								{conexionComprobada ? "No disponible ahora" : "Conectando…"}
+							</span>
 						)}
 					</button>
 				</div>
@@ -349,9 +382,9 @@ export default function QuizPRL({
 	// Fase: Configurar cantidad de jugadores (solo multijugador)
 	if (fase === "config" && modo === "multijugador") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-2xl font-bold mb-2">Modo Multijugador</h2>
-				<p className="text-gray-500 mb-6">
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<h2 className="text-4xl font-display mb-2">Modo Multijugador</h2>
+				<p className="text-ink-muted mb-6">
 					¿Cuántos participantes realizarán el test?
 				</p>
 				<form
@@ -360,6 +393,7 @@ export default function QuizPRL({
 				>
 					<input
 						type="number"
+						aria-label="Número de participantes"
 						min="2"
 						max="20"
 						value={totalJugadores}
@@ -368,18 +402,18 @@ export default function QuizPRL({
 								Math.max(2, Math.min(20, parseInt(e.target.value) || 2)),
 							)
 						}
-						className="p-3 border rounded-lg text-center text-xl font-bold"
+						className="p-3 border border-line rounded-lg text-center text-xl font-mono font-bold bg-card"
 					/>
 					<button
 						type="submit"
-						className="bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-800 transition"
+						className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition"
 					>
 						Continuar
 					</button>
 					<button
 						type="button"
 						onClick={reiniciarTodo}
-						className="text-gray-500 underline text-sm"
+						className="text-ink-muted underline text-sm"
 					>
 						← Volver
 					</button>
@@ -388,46 +422,55 @@ export default function QuizPRL({
 		);
 	}
 
-	// Fase: Configurar → pedir nombre (individual salta config)
-	if (fase === "config" && modo === "individual") {
-		setFase("nombre");
-		return null;
-	}
-
 	// Fase: Pedir nombre
 	if (fase === "nombre") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-2xl font-bold mb-2">
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<h2 className="text-4xl font-display mb-2">
 					{modo === "multijugador"
 						? `Jugador ${jugadorActualIdx + 1} de ${totalJugadores}`
 						: "Test de PRL"}
 				</h2>
-				<p className="text-gray-500 mb-6">Introduce tu nombre para comenzar</p>
+				<p className="text-ink-muted mb-6">Introduce tu nombre para comenzar</p>
+				{modo === "multijugador" && jugadorActualIdx > 0 && (
+					<p className="max-w-sm mx-auto mb-6 rounded-lg border border-line bg-surface p-3 text-sm text-ink-soft">
+						Mismo test que el jugador 1: {preguntas.length} preguntas
+						{timerConfig.activo && (
+							<>
+								{" "}
+								· Temporizador de{" "}
+								{timerConfig.tipo === "pregunta"
+									? `${timerConfig.segundos} s por pregunta`
+									: `${timerConfig.segundos / 60} min por test`}
+							</>
+						)}
+					</p>
+				)}
 				<form
 					onSubmit={confirmarNombre}
 					className="max-w-sm mx-auto flex flex-col gap-4"
 				>
 					<input
 						type="text"
+						aria-label="Tu nombre"
 						value={nombreUsuario}
 						onChange={(e) => setNombreUsuario(e.target.value)}
 						placeholder="Tu nombre"
-						className="p-3 border rounded-lg text-center text-lg"
+						className="p-3 border border-line rounded-lg text-center text-lg bg-card"
 						maxLength={30}
 						autoFocus
 					/>
 					<button
 						type="submit"
 						disabled={!nombreUsuario.trim()}
-						className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-800 transition disabled:opacity-40"
+						className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-40"
 					>
 						Continuar
 					</button>
 					<button
 						type="button"
 						onClick={reiniciarTodo}
-						className="text-gray-500 underline text-sm"
+						className="text-ink-muted underline text-sm"
 					>
 						← Volver al inicio
 					</button>
@@ -439,12 +482,12 @@ export default function QuizPRL({
 	// Fase: Elegir categorías (opcional)
 	if (fase === "categorias") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8">
+			<section id="quiz" className="bg-bg p-8 text-ink">
 				<div className="text-center mb-6">
-					<h2 className="text-2xl font-bold mb-1">
-						Hola, {nombreUsuario.trim()} 👋
+					<h2 className="text-4xl font-display mb-1">
+						Hola, {nombreUsuario.trim()}
 					</h2>
-					<p className="text-gray-500">
+					<p className="text-ink-muted">
 						Selecciona categorías temáticas o continúa con todas
 					</p>
 				</div>
@@ -462,7 +505,7 @@ export default function QuizPRL({
 							categoriasSeleccionadas.length > 0 &&
 							preguntasFiltradas.length === 0
 						}
-						className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-800 transition disabled:opacity-40"
+						className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-40"
 					>
 						{categoriasSeleccionadas.length === 0
 							? "Continuar con todas las categorías"
@@ -470,7 +513,7 @@ export default function QuizPRL({
 					</button>
 					<button
 						onClick={() => setFase("nombre")}
-						className="text-gray-500 underline text-sm"
+						className="text-ink-muted underline text-sm"
 					>
 						← Volver
 					</button>
@@ -482,11 +525,11 @@ export default function QuizPRL({
 	// Fase: Elegir cantidad de preguntas
 	if (fase === "cantidad") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-2xl font-bold mb-2">
-					Hola, {nombreUsuario.trim()} 👋
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<h2 className="text-4xl font-display mb-2">
+					Hola, {nombreUsuario.trim()}
 				</h2>
-				<p className="text-gray-500 mb-6">
+				<p className="text-ink-muted mb-6">
 					Hay {preguntasFiltradas.length} preguntas disponibles
 					{categoriasSeleccionadas.length > 0 &&
 						` en ${categoriasSeleccionadas.length} categoría${categoriasSeleccionadas.length > 1 ? "s" : ""}`}
@@ -497,7 +540,7 @@ export default function QuizPRL({
 						<button
 							key={n}
 							onClick={() => confirmarCantidad(n)}
-							className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-800 transition text-lg"
+							className="bg-card border border-line text-ink px-6 py-3 rounded-lg font-semibold hover:bg-surface transition text-lg"
 						>
 							{n === todasPreguntas.length ? `Todas (${n})` : `${n} preguntas`}
 						</button>
@@ -505,7 +548,7 @@ export default function QuizPRL({
 				</div>
 				<button
 					onClick={() => setFase("categorias")}
-					className="mt-4 text-gray-500 underline text-sm"
+					className="mt-4 text-ink-muted underline text-sm"
 				>
 					← Volver
 				</button>
@@ -516,9 +559,12 @@ export default function QuizPRL({
 	// Fase: Configurar temporizador (opcional)
 	if (fase === "timer") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-2xl font-bold mb-2">⏱️ Temporizador</h2>
-				<p className="text-gray-500 mb-6">
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<h2 className="text-4xl font-display mb-2 inline-flex items-center gap-3 justify-center">
+					<Timer aria-hidden="true" size={20} strokeWidth={1.75} />
+					Temporizador
+				</h2>
+				<p className="text-ink-muted mb-6">
 					¿Quieres jugar con límite de tiempo? Es opcional.
 				</p>
 				<div className="max-w-md mx-auto flex flex-col gap-6">
@@ -526,13 +572,13 @@ export default function QuizPRL({
 						onClick={() =>
 							iniciarTestConTimer({ activo: false, tipo: null, segundos: null })
 						}
-						className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-800 transition text-lg"
+						className="bg-card border border-line text-ink px-6 py-3 rounded-lg font-semibold hover:bg-surface transition text-lg"
 					>
 						Sin temporizador
 					</button>
 
 					<div>
-						<p className="text-sm text-gray-600 mb-3 font-semibold">
+						<p className="text-sm text-ink-muted mb-3 font-semibold">
 							Por pregunta:
 						</p>
 						<div className="flex flex-wrap justify-center gap-3">
@@ -546,7 +592,7 @@ export default function QuizPRL({
 											segundos: s,
 										})
 									}
-									className="bg-orange-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-orange-700 transition"
+									className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-semibold transition"
 								>
 									{s}s
 								</button>
@@ -555,7 +601,7 @@ export default function QuizPRL({
 					</div>
 
 					<div>
-						<p className="text-sm text-gray-600 mb-3 font-semibold">
+						<p className="text-sm text-ink-muted mb-3 font-semibold">
 							Por test completo:
 						</p>
 						<div className="flex flex-wrap justify-center gap-3">
@@ -569,7 +615,7 @@ export default function QuizPRL({
 											segundos: m * 60,
 										})
 									}
-									className="bg-blue-600 text-white px-4 py-2 rounded-lg font-semibold hover:bg-blue-700 transition"
+									className="bg-primary hover:bg-primary-dark text-white px-4 py-2 rounded-lg font-semibold transition"
 								>
 									{m} min
 								</button>
@@ -579,7 +625,7 @@ export default function QuizPRL({
 
 					<button
 						onClick={() => setFase("cantidad")}
-						className="text-gray-500 underline text-sm"
+						className="text-ink-muted underline text-sm"
 					>
 						← Volver
 					</button>
@@ -592,16 +638,16 @@ export default function QuizPRL({
 	if (fase === "test" && !finalizado) {
 		const preguntaActual = preguntas[indice];
 		return (
-			<section id="quiz" className="bg-gray-100 p-6">
-				<h2 className="text-2xl font-bold mb-1 text-center">Test de PRL</h2>
-				<p className="text-center text-sm text-gray-400 mb-1">
+			<section id="quiz" className="bg-bg px-4 py-10 md:p-12 text-ink">
+				<h2 className="text-4xl font-display mb-1 text-center">Test de PRL</h2>
+				<p className="text-center text-sm text-ink-muted mb-1">
 					{nombreUsuario.trim()}
 					{modo === "multijugador" &&
 						` · Jugador ${jugadorActualIdx + 1}/${totalJugadores}`}
 				</p>
-				<p className="text-center text-sm text-gray-500 mb-4">
-					Pregunta {indice + 1} de {preguntas.length} &middot;{" "}
-					<span className="font-semibold text-green-700">
+				<p className="text-center text-sm text-ink-muted mb-4 font-mono">
+					Pregunta {indice + 1} / {preguntas.length} &middot;{" "}
+					<span className="font-semibold text-ok-ink">
 						{aciertos} aciertos
 					</span>
 					{timerConfig.activo && tiempoRestante !== null && (
@@ -611,25 +657,27 @@ export default function QuizPRL({
 							<span
 								className={`font-mono font-bold ${
 									tiempoRestante <= (timerConfig.tipo === "pregunta" ? 5 : 30)
-										? "text-red-600 animate-pulse"
+										? "text-ko"
 										: tiempoRestante <=
 											  (timerConfig.tipo === "pregunta" ? 10 : 60)
-											? "text-orange-600"
-											: "text-gray-700"
+											? "bg-signal text-ink rounded px-1"
+											: "text-ink-soft"
 								}`}
 							>
-								⏱️ {formatearTiempo(tiempoRestante)}
+								<Timer aria-hidden="true" size={20} strokeWidth={1.75} className="inline" />{" "}
+								{formatearTiempo(tiempoRestante)}
 							</span>
 						</>
 					)}
 				</p>
 				{respondida && seleccion === null && tiempoRestante === 0 && (
-					<p className="text-center text-red-600 font-semibold mb-2">
-						⏱️ ¡Tiempo agotado!
+					<p className="text-center text-ko font-semibold mb-2">
+						<Timer aria-hidden="true" size={20} strokeWidth={1.75} className="inline" /> ¡Tiempo
+						agotado!
 					</p>
 				)}
-				<div className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow">
-					<span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded mb-3">
+				<div className="max-w-2xl mx-auto bg-card p-5 md:p-8 rounded-2xl border border-line shadow-sm">
+					<span className="inline-block bg-surface text-ink-soft text-xs font-mono px-2 py-1 rounded mb-3">
 						{preguntaActual.categoria}
 					</span>
 					<p className="font-semibold text-lg mb-4">
@@ -638,23 +686,25 @@ export default function QuizPRL({
 					<div className="grid gap-3">
 						{preguntaActual.opciones.map((opcion, idx) => {
 							let estilo =
-								"border p-3 rounded-lg cursor-pointer transition text-left";
+								"border p-3 rounded-xl cursor-pointer transition text-left w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 							if (respondida) {
 								if (idx === preguntaActual.respuesta) {
-									estilo += " bg-green-100 border-green-500 text-green-800";
+									estilo += " bg-ok-bg border-ok text-ok-ink";
 								} else if (idx === seleccion) {
-									estilo += " bg-red-100 border-red-500 text-red-800";
+									estilo += " bg-ko-bg border-ko text-ko-ink";
 								} else {
-									estilo += " opacity-50";
+									estilo += " border-line text-ink-muted";
 								}
 							} else if (idx === seleccion) {
-								estilo += " border-blue-500 bg-blue-50";
+								estilo += " border-primary bg-surface";
 							} else {
-								estilo += " hover:bg-gray-50";
+								estilo += " border-line hover:bg-surface";
 							}
 							return (
 								<button
 									key={idx}
+									type="button"
+									disabled={respondida}
 									className={estilo}
 									onClick={() => seleccionarOpcion(idx)}
 								>
@@ -670,7 +720,7 @@ export default function QuizPRL({
 						<div className="mt-4 text-right">
 							<button
 								onClick={siguiente}
-								className="bg-green-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-800 transition"
+								className="bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-lg font-semibold transition"
 							>
 								{indice + 1 < preguntas.length
 									? "Siguiente →"
@@ -689,32 +739,32 @@ export default function QuizPRL({
 		const esUltimoJugador =
 			modo === "individual" || jugadorActualIdx + 1 >= totalJugadores;
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-3xl font-bold mb-4">
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<h2 className="text-4xl font-display mb-4">
 					¡Test finalizado, {nombreUsuario.trim()}!
 				</h2>
-				<div className="max-w-md mx-auto bg-white p-6 rounded-xl shadow-lg">
-					<p className="text-5xl font-bold mb-2 text-green-700">
+				<div className="max-w-md mx-auto bg-card p-6 rounded-xl border border-line">
+					<p className="text-6xl font-mono font-bold mb-2 text-ok-ink">
 						{ultimo?.porcentaje ?? 0}%
 					</p>
 					<p className="text-lg mb-4">
 						Has acertado{" "}
-						<span className="font-bold">{ultimo?.aciertos ?? 0}</span> de{" "}
-						<span className="font-bold">{ultimo?.total ?? 0}</span> preguntas
+						<span className="font-bold font-mono">{ultimo?.aciertos ?? 0}</span> de{" "}
+						<span className="font-bold font-mono">{ultimo?.total ?? 0}</span> preguntas
 					</p>
 					{(ultimo?.porcentaje ?? 0) >= 70 ? (
-						<p className="text-green-600 font-semibold mb-4">
+						<p className="text-ok-ink font-semibold mb-4">
 							¡Buen trabajo! Dominas la materia.
 						</p>
 					) : (
-						<p className="text-orange-600 font-semibold mb-4">
+						<p className="text-signal-ink font-semibold mb-4">
 							Sigue estudiando, ¡tú puedes mejorar!
 						</p>
 					)}
 					{modo === "multijugador" && !esUltimoJugador ? (
 						<button
 							onClick={siguienteJugador}
-							className="bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-800 transition"
+							className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition"
 						>
 							Siguiente jugador →
 						</button>
@@ -722,13 +772,14 @@ export default function QuizPRL({
 						<div className="flex flex-col gap-3">
 							<button
 								onClick={siguienteJugador}
-								className="bg-indigo-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-indigo-800 transition"
+								className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition inline-flex items-center justify-center gap-2"
 							>
-								🏆 Ver Ranking
+								<Trophy aria-hidden="true" size={20} strokeWidth={1.75} />
+								Ver Ranking
 							</button>
 							<button
 								onClick={reiniciarTodo}
-								className="text-gray-500 underline text-sm"
+								className="text-ink-muted underline text-sm"
 							>
 								Nuevo test
 							</button>

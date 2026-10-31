@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
+import { Crown, Globe, Rocket, UserRound, UsersRound } from "lucide-react";
 import CategorySelector from "./CategorySelector";
 
 export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
@@ -11,27 +12,62 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 	const [esHost, setEsHost] = useState(false);
 	const [error, setError] = useState("");
 	const [todasPreguntas, setTodasPreguntas] = useState([]);
+	const [errorCarga, setErrorCarga] = useState("");
 	const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
 	const [timerTipo, setTimerTipo] = useState("ninguno");
 	const [timerSegundos, setTimerSegundos] = useState(30);
 
 	// Cargar preguntas para extraer categorías
 	useEffect(() => {
-		fetch("/preguntas-prl.json")
-			.then((res) => res.json())
-			.then((data) => setTodasPreguntas(data))
-			.catch(() => {});
+		const controlador = new AbortController();
+		fetch("/preguntas-prl.json", { signal: controlador.signal })
+			.then((res) => {
+				if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
+				return res.json();
+			})
+			.then((data) => {
+				if (!Array.isArray(data) || data.length === 0) {
+					throw new Error("El banco de preguntas está vacío o no es válido");
+				}
+				setTodasPreguntas(data);
+			})
+			.catch((error) => {
+				if (controlador.signal.aborted) return;
+				setErrorCarga(`No se pudieron cargar las preguntas: ${error.message}`);
+			});
+		return () => controlador.abort();
 	}, []);
 
-	const categoriasDisponibles = [
-		...new Set(todasPreguntas.map((p) => p.categoria)),
-	].sort();
-
-	function toggleCategoria(cat) {
-		setCategoriasSeleccionadas((prev) =>
-			prev.includes(cat) ? prev.filter((c) => c !== cat) : [...prev, cat],
+	const preguntasFiltradas = useMemo(
+		() =>
+			categoriasSeleccionadas.length > 0
+				? todasPreguntas.filter((p) =>
+						categoriasSeleccionadas.includes(p.categoria),
+					)
+				: todasPreguntas,
+		[todasPreguntas, categoriasSeleccionadas],
+	);
+	const opcionesCantidad = useMemo(() => {
+		const opciones = [5, 10, 15, 20].filter(
+			(cantidad) => cantidad <= preguntasFiltradas.length,
 		);
-	}
+		if (
+			preguntasFiltradas.length > 0 &&
+			!opciones.includes(preguntasFiltradas.length)
+		) {
+			opciones.push(preguntasFiltradas.length);
+		}
+		return opciones;
+	}, [preguntasFiltradas]);
+
+	useEffect(() => {
+		if (
+			opcionesCantidad.length > 0 &&
+			!opcionesCantidad.includes(numPreguntas)
+		) {
+			setNumPreguntas(opcionesCantidad[0]);
+		}
+	}, [numPreguntas, opcionesCantidad]);
 
 	useEffect(() => {
 		if (!socket) return;
@@ -66,7 +102,7 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 
 	function crearSala(e) {
 		e.preventDefault();
-		if (!nombre.trim()) return;
+		if (!nombre.trim() || preguntasFiltradas.length === 0) return;
 		setError("");
 		socket.emit(
 			"crear-sala",
@@ -120,30 +156,39 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 	// --- PANTALLA: Elegir crear o unirse ---
 	if (fase === "elegir") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-2xl font-bold mb-2">🌐 Modo En Red</h2>
-				<p className="text-gray-500 mb-6">
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<h2 className="text-4xl font-display mb-2 inline-flex items-center gap-3 justify-center w-full">
+					<Globe aria-hidden="true" size={20} strokeWidth={1.75} />
+					Modo En Red
+				</h2>
+				<p className="text-ink-muted mb-6">
 					Juega con otros participantes conectados desde sus dispositivos
 				</p>
 				<div className="flex flex-wrap justify-center gap-4">
 					<button
 						onClick={() => setFase("crear")}
-						className="bg-green-700 text-white px-6 py-4 rounded-xl font-semibold hover:bg-green-800 transition text-lg flex flex-col items-center gap-1"
+						disabled={todasPreguntas.length === 0}
+						className="bg-primary hover:bg-primary-dark text-white px-6 py-4 rounded-xl font-semibold transition text-lg flex flex-col items-center gap-2 disabled:opacity-40"
 					>
-						<span className="text-3xl">🏫</span>
+						<UsersRound aria-hidden="true" size={20} strokeWidth={1.75} />
 						Crear sala
 					</button>
 					<button
 						onClick={() => setFase("unirse")}
-						className="bg-blue-700 text-white px-6 py-4 rounded-xl font-semibold hover:bg-blue-800 transition text-lg flex flex-col items-center gap-1"
+						className="bg-card text-ink border border-line px-6 py-4 rounded-xl font-semibold hover:bg-surface hover:border-primary transition text-lg flex flex-col items-center gap-2"
 					>
-						<span className="text-3xl">🔗</span>
+						<Globe aria-hidden="true" size={20} strokeWidth={1.75} />
 						Unirse a sala
 					</button>
 				</div>
+				{errorCarga && (
+					<p role="alert" className="mt-4 text-ko text-sm">
+						{errorCarga}. Recarga la página para volver a intentarlo.
+					</p>
+				)}
 				<button
 					onClick={onVolverInicio}
-					className="mt-4 text-gray-500 underline text-sm"
+					className="mt-4 text-ink-muted underline text-sm"
 				>
 					← Volver
 				</button>
@@ -154,55 +199,58 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 	// --- PANTALLA: Crear sala ---
 	if (fase === "crear") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-2xl font-bold mb-2">Crear sala</h2>
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<h2 className="text-4xl font-display mb-2">Crear sala</h2>
 				<form
 					onSubmit={crearSala}
 					className="max-w-sm mx-auto flex flex-col gap-4"
 				>
 					<input
 						type="text"
+						aria-label="Tu nombre"
 						value={nombre}
 						onChange={(e) => setNombre(e.target.value)}
 						placeholder="Tu nombre"
-						className="p-3 border rounded-lg text-center text-lg"
+						className="p-3 border border-line rounded-lg text-center text-lg bg-card"
 						maxLength={30}
 						autoFocus
 					/>
-					<label className="text-sm text-gray-600 text-left">
+					<label htmlFor="numPreguntas" className="text-sm text-ink-muted text-left">
 						Número de preguntas:
 					</label>
 					<select
+						id="numPreguntas"
 						value={numPreguntas}
 						onChange={(e) => setNumPreguntas(Number(e.target.value))}
-						className="p-3 border rounded-lg text-center text-lg"
+						className="p-3 border border-line rounded-lg text-center text-lg bg-card"
 					>
-						{[5, 10, 15, 20].map((n) => (
+						{opcionesCantidad.map((n) => (
 							<option key={n} value={n}>
 								{n} preguntas
 							</option>
 						))}
 					</select>
-					<label className="text-sm text-gray-600 text-left mt-2">
+					<p className="text-sm text-ink-muted text-left mt-2">
 						Categorías (opcional):
-					</label>
+					</p>
 					<CategorySelector
 						preguntas={todasPreguntas}
 						seleccionadas={categoriasSeleccionadas}
 						onChange={setCategoriasSeleccionadas}
 						compacto
 					/>
-					<label className="text-sm text-gray-600 text-left mt-2">
+					<label htmlFor="timerTipo" className="text-sm text-ink-muted text-left mt-2">
 						Temporizador (opcional):
 					</label>
 					<select
+						id="timerTipo"
 						value={timerTipo}
 						onChange={(e) => {
 							setTimerTipo(e.target.value);
 							if (e.target.value === "pregunta") setTimerSegundos(30);
 							if (e.target.value === "test") setTimerSegundos(600);
 						}}
-						className="p-3 border rounded-lg text-center text-lg"
+						className="p-3 border border-line rounded-lg text-center text-lg bg-card"
 					>
 						<option value="ninguno">Sin temporizador</option>
 						<option value="pregunta">Por pregunta</option>
@@ -210,9 +258,10 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 					</select>
 					{timerTipo === "pregunta" && (
 						<select
+							aria-label="Segundos por pregunta"
 							value={timerSegundos}
 							onChange={(e) => setTimerSegundos(Number(e.target.value))}
-							className="p-3 border rounded-lg text-center text-lg"
+							className="p-3 border border-line rounded-lg text-center text-lg bg-card font-mono"
 						>
 							{[15, 30, 45, 60].map((s) => (
 								<option key={s} value={s}>
@@ -223,9 +272,10 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 					)}
 					{timerTipo === "test" && (
 						<select
+							aria-label="Duración del test"
 							value={timerSegundos}
 							onChange={(e) => setTimerSegundos(Number(e.target.value))}
-							className="p-3 border rounded-lg text-center text-lg"
+							className="p-3 border border-line rounded-lg text-center text-lg bg-card font-mono"
 						>
 							{[300, 600, 900, 1200].map((s) => (
 								<option key={s} value={s}>
@@ -234,11 +284,11 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 							))}
 						</select>
 					)}
-					{error && <p className="text-red-600 text-sm">{error}</p>}
+					{error && <p role="alert" className="text-ko text-sm">{error}</p>}
 					<button
 						type="submit"
-						disabled={!nombre.trim()}
-						className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-800 transition disabled:opacity-40"
+						disabled={!nombre.trim() || preguntasFiltradas.length === 0}
+						className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-40"
 					>
 						Crear sala
 					</button>
@@ -248,7 +298,7 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 							setFase("elegir");
 							setError("");
 						}}
-						className="text-gray-500 underline text-sm"
+						className="text-ink-muted underline text-sm"
 					>
 						← Volver
 					</button>
@@ -260,34 +310,36 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 	// --- PANTALLA: Unirse a sala ---
 	if (fase === "unirse") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-2xl font-bold mb-2">Unirse a sala</h2>
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<h2 className="text-4xl font-display mb-2">Unirse a sala</h2>
 				<form
 					onSubmit={unirseSala}
 					className="max-w-sm mx-auto flex flex-col gap-4"
 				>
 					<input
 						type="text"
+						aria-label="Tu nombre"
 						value={nombre}
 						onChange={(e) => setNombre(e.target.value)}
 						placeholder="Tu nombre"
-						className="p-3 border rounded-lg text-center text-lg"
+						className="p-3 border border-line rounded-lg text-center text-lg bg-card"
 						maxLength={30}
 						autoFocus
 					/>
 					<input
 						type="text"
+						aria-label="Código de sala"
 						value={codigo}
 						onChange={(e) => setCodigo(e.target.value.toUpperCase())}
 						placeholder="Código de sala (ej: PRL-A1B2)"
-						className="p-3 border rounded-lg text-center text-lg font-mono tracking-widest"
+						className="p-3 border border-line rounded-lg text-center text-lg font-mono tracking-widest bg-card"
 						maxLength={10}
 					/>
-					{error && <p className="text-red-600 text-sm">{error}</p>}
+					{error && <p role="alert" className="text-ko text-sm">{error}</p>}
 					<button
 						type="submit"
 						disabled={!nombre.trim() || !codigo.trim()}
-						className="bg-blue-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-blue-800 transition disabled:opacity-40"
+						className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-40"
 					>
 						Unirse
 					</button>
@@ -297,7 +349,7 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 							setFase("elegir");
 							setError("");
 						}}
-						className="text-gray-500 underline text-sm"
+						className="text-ink-muted underline text-sm"
 					>
 						← Volver
 					</button>
@@ -309,38 +361,45 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 	// --- PANTALLA: Esperando jugadores ---
 	if (fase === "esperando") {
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-2xl font-bold mb-2">Sala: {codigoSala}</h2>
-				<p className="text-gray-500 mb-2">
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<h2 className="text-4xl font-display mb-2">Sala: <span className="font-mono">{codigoSala}</span></h2>
+				<p className="text-ink-muted mb-2">
 					Comparte este código con los participantes
 				</p>
-				<p className="text-5xl font-mono font-bold text-green-700 tracking-widest mb-4">
+				<p className="text-3xl sm:text-5xl font-mono font-bold text-primary tracking-widest mb-4">
 					{codigoSala}
 				</p>
-				<div className="max-w-sm mx-auto bg-white rounded-xl p-4 shadow mb-4">
+				<div className="max-w-sm mx-auto bg-card border border-line rounded-xl p-4 mb-4">
 					<p className="font-semibold mb-2">
-						Jugadores conectados ({jugadores.length}):
+						Jugadores conectados (<span className="font-mono">{jugadores.length}</span>):
 					</p>
 					<ul className="text-left">
 						{jugadores.map((j, i) => (
-							<li key={i} className="py-1 border-b last:border-0">
-								{i === 0 ? "👑" : "👤"} {j}
+							<li key={i} className="py-1 border-b border-line last:border-0 flex items-center gap-2">
+								{i === 0 ? (
+									<Crown aria-hidden="true" size={20} strokeWidth={1.75} />
+								) : (
+									<UserRound aria-hidden="true" size={20} strokeWidth={1.75} />
+								)}
+								{j}
 							</li>
 						))}
 					</ul>
 				</div>
+				{error && <p role="alert" className="mb-4 text-ko text-sm">{error}</p>}
 				{esHost ? (
 					<button
 						onClick={iniciarTest}
 						disabled={jugadores.length < 2}
-						className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-800 transition disabled:opacity-40"
+						className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-40 inline-flex items-center gap-2"
 					>
 						{jugadores.length < 2
 							? "Esperando más jugadores…"
-							: `🚀 Iniciar test (${jugadores.length} jugadores)`}
+							: `Iniciar test (${jugadores.length} jugadores)`}
+						<Rocket aria-hidden="true" size={20} strokeWidth={1.75} />
 					</button>
 				) : (
-					<p className="text-gray-500 italic">
+					<p className="text-ink-muted italic">
 						Esperando a que el anfitrión inicie el test…
 					</p>
 				)}

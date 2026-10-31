@@ -1,4 +1,5 @@
-import React, { useState, useEffect, useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { Timer, Trophy } from "lucide-react";
 
 function formatearTiempo(segundos) {
 	if (segundos === null || segundos === undefined) return "";
@@ -22,211 +23,271 @@ export default function QuizOnline({
 	};
 	const [indice, setIndice] = useState(0);
 	const [seleccion, setSeleccion] = useState(null);
+	const [respuestaCorrecta, setRespuestaCorrecta] = useState(null);
 	const [aciertos, setAciertos] = useState(0);
 	const [respondida, setRespondida] = useState(false);
+	const [enviando, setEnviando] = useState(false);
+	const [errorRespuesta, setErrorRespuesta] = useState("");
+	const [esperandoResultado, setEsperandoResultado] = useState(false);
 	const [finalizado, setFinalizado] = useState(false);
 	const [ranking, setRanking] = useState([]);
 	const [terminados, setTerminados] = useState(0);
 	const [totalJugadores, setTotalJugadores] = useState(0);
 	const [completo, setCompleto] = useState(false);
 	const [tiempoRestante, setTiempoRestante] = useState(null);
-
-	// Refs para acceso en callbacks del timer
-	const indiceRef = useRef(0);
-	const aciertosRef = useRef(0);
-	const respondidaRef = useRef(false);
-	const finalizadoRef = useRef(false);
+	const indiceRef = useRef(indice);
+	const aciertosRef = useRef(aciertos);
+	const respondidaRef = useRef(respondida);
+	const finalizadoRef = useRef(finalizado);
+	const timeoutAvanceRef = useRef(null);
+	const timeoutFinalRef = useRef(null);
+	const opcionPendienteRef = useRef(null);
 	indiceRef.current = indice;
 	aciertosRef.current = aciertos;
 	respondidaRef.current = respondida;
 	finalizadoRef.current = finalizado;
 
+	function cancelarTimeouts() {
+		clearTimeout(timeoutAvanceRef.current);
+		clearTimeout(timeoutFinalRef.current);
+		timeoutAvanceRef.current = null;
+		timeoutFinalRef.current = null;
+	}
+
+	function avanzarPregunta() {
+		if (indiceRef.current + 1 >= preguntas.length) {
+			setFinalizado(true);
+			finalizadoRef.current = true;
+			return;
+		}
+		const siguienteIndice = indiceRef.current + 1;
+		setIndice(siguienteIndice);
+		indiceRef.current = siguienteIndice;
+		setSeleccion(null);
+		setRespuestaCorrecta(null);
+		setRespondida(false);
+		respondidaRef.current = false;
+		setErrorRespuesta("");
+	}
+
+	function programarCierreRanking() {
+		clearTimeout(timeoutFinalRef.current);
+		timeoutFinalRef.current = setTimeout(() => {
+			setFinalizado(true);
+			finalizadoRef.current = true;
+			timeoutFinalRef.current = null;
+		}, 1500);
+	}
+
 	useEffect(() => {
 		if (!socket) return;
-
 		function onRanking(data) {
 			setRanking(data.ranking);
 			setTerminados(data.terminados);
 			setTotalJugadores(data.totalJugadores);
 			setCompleto(data.completo);
+			if (data.ranking.some((resultado) => resultado.id === socket.id)) {
+				programarCierreRanking();
+			}
 		}
 
 		socket.on("ranking-actualizado", onRanking);
 		return () => socket.off("ranking-actualizado", onRanking);
 	}, [socket]);
 
-	// --- TIMER EFFECTS ---
-
-	// Cuenta atrás
 	useEffect(() => {
 		if (
 			finalizado ||
 			!timerConfig.activo ||
 			tiempoRestante === null ||
 			tiempoRestante <= 0
-		)
+		) {
 			return;
+		}
 		const id = setTimeout(() => setTiempoRestante((prev) => prev - 1), 1000);
 		return () => clearTimeout(id);
 	}, [tiempoRestante, finalizado, timerConfig.activo]);
 
-	// Por pregunta: reiniciar timer en cada pregunta nueva
 	useEffect(() => {
 		if (finalizado || !timerConfig.activo || timerConfig.tipo !== "pregunta")
 			return;
 		setTiempoRestante(timerConfig.segundos);
 	}, [indice, timerConfig, finalizado]);
 
-	// Por test: iniciar timer una sola vez
 	useEffect(() => {
-		if (!timerConfig.activo || timerConfig.tipo !== "test") return;
+		if (finalizado || !timerConfig.activo || timerConfig.tipo !== "test") return;
 		setTiempoRestante(timerConfig.segundos);
-	}, [timerConfig]);
+	}, [timerConfig, finalizado]);
 
-	// Timer llega a cero
-	useEffect(() => {
-		if (tiempoRestante !== 0 || !timerConfig.activo || finalizadoRef.current)
+	function enviarRespuesta(opcion) {
+		if (
+			respondidaRef.current ||
+			finalizadoRef.current ||
+			!socket ||
+			!preguntas[indiceRef.current]
+		) {
 			return;
+		}
+		respondidaRef.current = true;
+		opcionPendienteRef.current = opcion;
+		setEnviando(true);
+		setErrorRespuesta("");
+		if (timerConfig.tipo === "pregunta") setTiempoRestante(null);
 
-		if (timerConfig.tipo === "pregunta" && !respondidaRef.current) {
-			setRespondida(true);
-			const timeout = setTimeout(() => {
-				if (indiceRef.current + 1 < preguntas.length) {
-					setIndice((prev) => prev + 1);
-					setSeleccion(null);
-					setRespondida(false);
-				} else {
-					const porcentaje = Math.round(
-						(aciertosRef.current / preguntas.length) * 100,
+		socket.timeout(5000).emit(
+			"responder",
+			{ indice: indiceRef.current, opcion },
+			(error, respuesta) => {
+				setEnviando(false);
+				if (error || !respuesta?.ok) {
+					respondidaRef.current = false;
+					setErrorRespuesta(
+						respuesta?.error || "No se pudo enviar la respuesta. Reinténtalo.",
 					);
-					setFinalizado(true);
-					socket.emit("enviar-resultado", {
-						aciertos: aciertosRef.current,
-						total: preguntas.length,
-						porcentaje,
-					});
+					return;
 				}
-			}, 2000);
-			return () => clearTimeout(timeout);
-		}
 
-		if (timerConfig.tipo === "test") {
-			const currentAciertos = aciertosRef.current;
-			const porcentaje = Math.round((currentAciertos / preguntas.length) * 100);
-			setFinalizado(true);
-			socket.emit("enviar-resultado", {
-				aciertos: currentAciertos,
-				total: preguntas.length,
-				porcentaje,
-			});
+				setSeleccion(opcion);
+				opcionPendienteRef.current = null;
+				setRespuestaCorrecta(respuesta.correcta);
+				setRespondida(true);
+				setErrorRespuesta("");
+				if (respuesta.acierto) {
+					setAciertos((prev) => prev + 1);
+					aciertosRef.current++;
+				}
+
+				if (opcion === null && indiceRef.current + 1 < preguntas.length) {
+					timeoutAvanceRef.current = setTimeout(() => {
+						timeoutAvanceRef.current = null;
+						avanzarPregunta();
+					}, 2000);
+				} else if (opcion === null) {
+					timeoutFinalRef.current = setTimeout(() => {
+						timeoutFinalRef.current = null;
+						setFinalizado(true);
+						finalizadoRef.current = true;
+					}, 2000);
+				}
+			},
+		);
+	}
+
+	useEffect(() => {
+		if (
+			tiempoRestante !== 0 ||
+			!timerConfig.activo ||
+			finalizadoRef.current ||
+			respondidaRef.current
+		) {
+			return;
 		}
-	}, [tiempoRestante, timerConfig, preguntas, socket]);
+		if (timerConfig.tipo === "pregunta") {
+			enviarRespuesta(null);
+		} else if (timerConfig.tipo === "test") {
+			setEsperandoResultado(true);
+		}
+	}, [tiempoRestante, timerConfig]);
+
+	useEffect(() => () => cancelarTimeouts(), []);
 
 	const preguntaActual = preguntas[indice];
 
-	function seleccionarOpcion(idx) {
-		if (respondida) return;
-		setSeleccion(idx);
-		setRespondida(true);
-		if (timerConfig.activo && timerConfig.tipo === "pregunta") {
-			setTiempoRestante(null);
-		}
-		if (idx === preguntaActual.respuesta) {
-			setAciertos((prev) => prev + 1);
-		}
-	}
-
 	function siguiente() {
+		cancelarTimeouts();
 		if (indice + 1 < preguntas.length) {
-			setIndice((prev) => prev + 1);
-			setSeleccion(null);
-			setRespondida(false);
+			avanzarPregunta();
 		} else {
-			const totalAciertos =
-				aciertos + (seleccion === preguntaActual.respuesta ? 0 : 0);
-			const porcentaje = Math.round((aciertos / preguntas.length) * 100);
+			cancelarTimeouts();
 			setFinalizado(true);
-			socket.emit("enviar-resultado", {
-				aciertos,
-				total: preguntas.length,
-				porcentaje,
-			});
+			finalizadoRef.current = true;
 		}
 	}
 
-	// --- PANTALLA: Ranking en vivo ---
 	if (finalizado) {
-		const miResultado = ranking.find((r) => r.nombre === nombre);
+		const miResultado = ranking.find((resultado) => resultado.id === socket.id);
 		return (
-			<section id="quiz" className="bg-gray-100 p-8 text-center">
-				<h2 className="text-3xl font-bold mb-2">
-					{completo ? "🏆 Ranking Final" : "⏳ Esperando a los demás…"}
+			<section id="quiz" className="bg-bg px-4 py-10 md:p-12 text-center text-ink">
+				<h2 className="text-4xl font-display mb-2 inline-flex items-center gap-3 justify-center">
+					{completo ? (
+						<>
+							<Trophy aria-hidden="true" size={20} strokeWidth={1.75} />
+							Ranking final
+						</>
+					) : (
+						"Esperando a los demás…"
+					)}
 				</h2>
-				<p className="text-gray-500 mb-4">
+				<p className="text-ink-muted mb-6 font-mono text-sm">
 					Sala {codigoSala} — {terminados}/{totalJugadores} han terminado
 				</p>
 
 				{miResultado && !completo && (
-					<div className="max-w-md mx-auto bg-white p-4 rounded-xl shadow mb-4">
+					<div className="max-w-md mx-auto bg-surface p-4 rounded-xl border border-line mb-4">
 						<p className="text-lg">
 							Tu resultado:{" "}
-							<span className="font-bold text-green-700">
+							<span className="font-mono font-bold text-ok-ink">
 								{miResultado.porcentaje}%
 							</span>{" "}
-							({miResultado.aciertos}/{miResultado.total})
+							<span className="font-mono">({miResultado.aciertos}/{miResultado.total})</span>
 						</p>
 					</div>
 				)}
 
 				{ranking.length > 0 && (
-					<table className="w-full max-w-xl mx-auto border bg-white">
-						<thead>
-							<tr className="bg-green-100">
-								<th className="p-2 text-left">#</th>
-								<th className="p-2 text-left">Nombre</th>
-								<th className="p-2 text-right">Aciertos</th>
-								<th className="p-2 text-right">Puntuación</th>
-							</tr>
-						</thead>
-						<tbody>
-							{ranking.map((r, i) => (
-								<tr
-									key={i}
-									className={`border-t ${
-										r.nombre === nombre ? "bg-blue-50 font-bold" : ""
-									} ${i === 0 && completo ? "bg-yellow-50" : ""}`}
-								>
-									<td className="p-2 font-bold">
-										{completo
-											? i === 0
-												? "🥇"
-												: i === 1
-													? "🥈"
-													: i === 2
-														? "🥉"
-														: i + 1
-											: i + 1}
-									</td>
-									<td className="p-2">
-										{r.nombre} {r.nombre === nombre && "(tú)"}
-									</td>
-									<td className="p-2 text-right">
-										{r.aciertos}/{r.total}
-									</td>
-									<td className="p-2 text-right font-semibold">
-										{r.porcentaje}%
-									</td>
+					<div className="w-full max-w-xl mx-auto overflow-x-auto border border-line rounded-xl bg-card">
+						<table className="w-full">
+							<thead>
+								<tr className="bg-surface">
+									<th className="p-3 text-left">#</th>
+									<th className="p-3 text-left">Nombre</th>
+									<th className="p-3 text-right">Aciertos</th>
+									<th className="p-3 text-right">Puntuación</th>
 								</tr>
-							))}
-						</tbody>
-					</table>
+							</thead>
+							<tbody>
+								{ranking.map((resultado, posicion) => (
+									<tr
+										key={resultado.id}
+										className={`border-t border-line ${
+											resultado.id === socket.id
+												? "bg-surface font-bold"
+												: ""
+										}`}
+									>
+										<td className="p-3 font-mono font-bold">
+											{completo
+												? posicion === 0
+													? "🥇"
+													: posicion === 1
+														? "🥈"
+														: posicion === 2
+															? "🥉"
+															: posicion + 1
+												: posicion + 1}
+										</td>
+										<td className="p-3">
+											{resultado.nombre}{" "}
+											{resultado.id === socket.id && "(tú)"}
+										</td>
+										<td className="p-3 text-right font-mono">
+											{resultado.aciertos}/{resultado.total}
+										</td>
+										<td className="p-3 text-right font-mono font-semibold">
+											{resultado.porcentaje}%
+										</td>
+									</tr>
+								))}
+							</tbody>
+						</table>
+					</div>
 				)}
 
 				{completo && (
 					<div className="mt-6">
 						<button
 							onClick={onVolverInicio}
-							className="bg-green-700 text-white px-6 py-3 rounded-xl font-semibold hover:bg-green-800 transition"
+							className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition"
 						>
 							Nueva sesión
 						</button>
@@ -236,85 +297,109 @@ export default function QuizOnline({
 		);
 	}
 
-	// --- PANTALLA: Test en curso ---
+	if (!preguntaActual) return null;
+
 	return (
-		<section id="quiz" className="bg-gray-100 p-6">
-			<h2 className="text-2xl font-bold mb-1 text-center">Test de PRL</h2>
-			<p className="text-center text-sm text-gray-400 mb-1">
-				{nombre} · Sala {codigoSala}
+		<section id="quiz" className="bg-bg px-4 py-10 md:p-12 text-ink">
+			<h2 className="text-4xl font-display mb-1 text-center">Test de PRL</h2>
+			<p className="text-center text-sm text-ink-muted mb-1">
+				{nombre} · Sala <span className="font-mono">{codigoSala}</span>
 			</p>
-			<p className="text-center text-sm text-gray-500 mb-4">
-				Pregunta {indice + 1} de {preguntas.length} &middot;{" "}
-				<span className="font-semibold text-green-700">
-					{aciertos} aciertos
-				</span>
+			<p className="text-center text-sm text-ink-muted mb-4 font-mono">
+				Pregunta {indice + 1} / {preguntas.length} ·{" "}
+				<span className="font-semibold text-ok-ink">{aciertos} aciertos</span>
 				{timerConfig.activo && tiempoRestante !== null && (
 					<>
 						{" "}
-						&middot;{" "}
+						·{" "}
 						<span
 							className={`font-mono font-bold ${
 								tiempoRestante <= (timerConfig.tipo === "pregunta" ? 5 : 30)
-									? "text-red-600 animate-pulse"
+									? "text-ko"
 									: tiempoRestante <=
 										  (timerConfig.tipo === "pregunta" ? 10 : 60)
-										? "text-orange-600"
-										: "text-gray-700"
+										? "bg-signal text-ink rounded px-1"
+										: "text-ink-soft"
 							}`}
 						>
-							⏱️ {formatearTiempo(tiempoRestante)}
+							<Timer aria-hidden="true" size={20} strokeWidth={1.75} className="inline" />{" "}
+							{formatearTiempo(tiempoRestante)}
 						</span>
 					</>
 				)}
 			</p>
-			{respondida && seleccion === null && tiempoRestante === 0 && (
-				<p className="text-center text-red-600 font-semibold mb-2">
-					⏱️ ¡Tiempo agotado!
+			{esperandoResultado && (
+				<p role="status" className="text-center text-ink-muted mb-4">
+					Tiempo agotado. Calculando resultado…
 				</p>
 			)}
-			<div className="max-w-2xl mx-auto bg-white p-6 rounded-xl shadow">
-				<span className="inline-block bg-green-100 text-green-800 text-xs font-medium px-2 py-1 rounded mb-3">
+			{respondida && seleccion === null && tiempoRestante === 0 && (
+				<p className="text-center text-ko font-semibold mb-2">
+					<Timer aria-hidden="true" size={20} strokeWidth={1.75} className="inline" /> ¡Tiempo
+					agotado!
+				</p>
+			)}
+			<div className="max-w-2xl mx-auto bg-card p-5 md:p-8 rounded-2xl border border-line shadow-sm">
+				<span className="inline-block bg-surface text-ink-soft text-xs font-mono px-2 py-1 rounded mb-3">
 					{preguntaActual.categoria}
 				</span>
 				<p className="font-semibold text-lg mb-4">{preguntaActual.pregunta}</p>
 				<div className="grid gap-3">
-					{preguntaActual.opciones.map((opcion, idx) => {
+					{preguntaActual.opciones.map((opcion, indiceOpcion) => {
 						let estilo =
-							"border p-3 rounded-lg cursor-pointer transition text-left";
+							"border p-3 rounded-xl cursor-pointer transition text-left w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
 						if (respondida) {
-							if (idx === preguntaActual.respuesta) {
-								estilo += " bg-green-100 border-green-500 text-green-800";
-							} else if (idx === seleccion) {
-								estilo += " bg-red-100 border-red-500 text-red-800";
+							if (indiceOpcion === respuestaCorrecta) {
+								estilo += " bg-ok-bg border-ok text-ok-ink";
+							} else if (indiceOpcion === seleccion) {
+								estilo += " bg-ko-bg border-ko text-ko-ink";
 							} else {
-								estilo += " opacity-50";
+								estilo += " border-line text-ink-muted";
 							}
-						} else if (idx === seleccion) {
-							estilo += " border-blue-500 bg-blue-50";
+						} else if (indiceOpcion === seleccion) {
+							estilo += " border-primary bg-surface";
 						} else {
-							estilo += " hover:bg-gray-50";
+							estilo += " border-line hover:bg-surface";
 						}
 						return (
 							<button
-								key={idx}
+								key={indiceOpcion}
+								type="button"
+								disabled={respondida || enviando || esperandoResultado}
 								className={estilo}
-								onClick={() => seleccionarOpcion(idx)}
+								onClick={() => enviarRespuesta(indiceOpcion)}
 							>
 								<span className="font-semibold mr-2">
-									{String.fromCharCode(65 + idx)}.
+									{String.fromCharCode(65 + indiceOpcion)}.
 								</span>
 								{opcion}
 							</button>
 						);
 					})}
 				</div>
-				{respondida && (
+				{errorRespuesta && (
+					<div className="mt-4 flex flex-wrap items-center justify-between gap-3">
+						<p role="alert" className="text-ko text-sm">
+							{errorRespuesta}
+						</p>
+						<button
+							type="button"
+							onClick={() => enviarRespuesta(opcionPendienteRef.current)}
+							className="underline text-sm text-ink-soft"
+						>
+							Reintentar
+						</button>
+					</div>
+				)}
+				{respondida && seleccion !== null && (
 					<div className="mt-4 text-right">
 						<button
 							onClick={siguiente}
-							className="bg-green-700 text-white px-5 py-2 rounded-lg font-semibold hover:bg-green-800 transition"
+							className="bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-lg font-semibold transition"
 						>
-							{indice + 1 < preguntas.length ? "Siguiente →" : "Finalizar test"}
+							{indice + 1 < preguntas.length
+								? "Siguiente →"
+								: "Ver resultado"}
 						</button>
 					</div>
 				)}

@@ -1,9 +1,7 @@
 import React, { useState, useCallback } from "react";
 import Hero from "./components/Hero";
-import Features from "./components/Features";
 import QuizPRL from "./components/PreviewEditor";
 import RankingSummary from "./components/RankingSummary";
-import ContactForm from "./components/ContactForm";
 import Footer from "./components/Footer";
 import Sala from "./components/Sala";
 import QuizOnline from "./components/QuizOnline";
@@ -12,21 +10,22 @@ import useSocket from "./hooks/useSocket";
 export default function App() {
 	const [resultados, setResultados] = useState([]);
 	const [mostrarRanking, setMostrarRanking] = useState(false);
-	const [mostrarContacto, setMostrarContacto] = useState(false);
+	const [sesion, setSesion] = useState(0);
 
 	// Estado para modo en red
 	const [modoRed, setModoRed] = useState(false);
 	const [datosOnline, setDatosOnline] = useState(null); // {preguntas, codigoSala, nombre}
 
-	const { socket, conectado } = useSocket();
+	const { socket, conectado, conexionComprobada } = useSocket();
 
-	function agregarResultado(resultado) {
+	const agregarResultado = useCallback((resultado) => {
 		setResultados((prev) => [...prev, resultado]);
-	}
+	}, []);
 
 	function iniciarNuevoRanking() {
 		setResultados([]);
 		setMostrarRanking(false);
+		setSesion((prev) => prev + 1);
 	}
 
 	const handleTestIniciado = useCallback((datos) => {
@@ -34,14 +33,14 @@ export default function App() {
 	}, []);
 
 	function volverInicio() {
+		socket?.emit("salir-sala", null);
 		setModoRed(false);
 		setDatosOnline(null);
 	}
 
 	return (
 		<div>
-			<Hero onContacto={() => setMostrarContacto(true)} />
-			<Features />
+			<Hero />
 
 			{/* Modo En Red: sala + quiz online */}
 			{modoRed && !datosOnline && (
@@ -66,12 +65,13 @@ export default function App() {
 			{!modoRed && (
 				<>
 					<QuizPRL
+						key={sesion}
 						onResultado={agregarResultado}
 						resultados={resultados}
-						mostrarRanking={mostrarRanking}
 						setMostrarRanking={setMostrarRanking}
 						onModoRed={() => setModoRed(true)}
 						socketConectado={conectado}
+						conexionComprobada={conexionComprobada}
 					/>
 					{mostrarRanking && (
 						<RankingSummary
@@ -82,9 +82,6 @@ export default function App() {
 				</>
 			)}
 
-			{mostrarContacto && (
-				<ContactForm onClose={() => setMostrarContacto(false)} />
-			)}
 			<Footer />
 		</div>
 	);
