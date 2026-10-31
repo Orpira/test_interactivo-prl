@@ -1,3 +1,4 @@
+import { Agent, get } from "node:http";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { io as clienteIo } from "socket.io-client";
 import { crearServidorSalas, generarCodigo } from "./salas.js";
@@ -30,6 +31,21 @@ function esperarEvento(socket, evento) {
 
 function emitir(socket, evento, datos) {
 	return new Promise((resolve) => socket.emit(evento, datos, resolve));
+}
+
+// Un Agent propio evita el proxy del entorno (NODE_USE_ENV_PROXY), que solo afecta al agente global.
+function pedirJson(direccion) {
+	const agent = new Agent();
+	return new Promise((resolve, reject) => {
+		get(direccion, { agent }, (respuesta) => {
+			let cuerpo = "";
+			respuesta.on("data", (trozo) => (cuerpo += trozo));
+			respuesta.on("end", () => {
+				agent.destroy();
+				resolve(JSON.parse(cuerpo));
+			});
+		}).on("error", reject);
+	});
 }
 
 function conectar() {
@@ -97,9 +113,7 @@ describe("servidor de salas", () => {
 		});
 
 		expect(await listaJugadores).toEqual(["Anfitrión", "Invitado"]);
-		await expect(fetch(`${url}/health`).then((res) => res.json())).resolves.toEqual({
-			ok: true,
-		});
+		await expect(pedirJson(`${url}/health`)).resolves.toEqual({ ok: true });
 	});
 
 	it("abandona la sala anterior al crear otra y reasigna al anfitrión", async () => {
