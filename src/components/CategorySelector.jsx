@@ -1,6 +1,7 @@
 import React, {
 	useCallback,
 	useEffect,
+	useId,
 	useLayoutEffect,
 	useMemo,
 	useRef,
@@ -143,6 +144,9 @@ export default function CategorySelector({
 	const panelRef = useRef(null);
 	const buscadorRef = useRef(null);
 	const botonesGrupo = useRef({});
+	const accionGrupoRef = useRef(null);
+	const abiertoConTeclado = useRef(false);
+	const idPanel = useId();
 
 	const recuentos = useMemo(() => contarPorCategoria(preguntas), [preguntas]);
 	const grupos = useMemo(() => construirGrupos(preguntas), [preguntas]);
@@ -181,11 +185,31 @@ export default function CategorySelector({
 	}
 
 	function alPulsarTecla(evento) {
-		if (evento.key === "Escape" && buscando) {
+		if (evento.key !== "Escape") return;
+		if (buscando) {
 			evento.stopPropagation();
 			borrarBusqueda();
+			return;
+		}
+		const botonAbierto = botonesGrupo.current[grupoAbierto];
+		if (grupoAbierto && (panelRef.current?.contains(evento.target) || evento.target === botonAbierto)) {
+			evento.stopPropagation();
+			setGrupoAbierto(null);
+			botonAbierto?.focus();
 		}
 	}
+
+	// Con teclado el foco entra en el panel, para que el siguiente Tab llegue a las pegatinas
+	// sin recorrer antes el resto de señales.
+	function alternarPanel(evento, nombre, abierto) {
+		abiertoConTeclado.current = !abierto && evento.detail === 0;
+		setGrupoAbierto(abierto ? null : nombre);
+	}
+
+	useEffect(() => {
+		if (abiertoConTeclado.current && grupoAbierto) accionGrupoRef.current?.focus();
+		abiertoConTeclado.current = false;
+	}, [grupoAbierto]);
 
 	const medirFila = useCallback(() => {
 		const fila = filaRef.current;
@@ -357,12 +381,13 @@ export default function CategorySelector({
 												botonesGrupo.current[grupo.nombre] = elemento;
 											}}
 											aria-expanded={abierto}
+											aria-controls={abierto ? idPanel : undefined}
 											aria-label={`${grupo.nombre}, ${textoPreguntas(grupo.total)}, ${
 												elegidas === 0
 													? "ningún tema seleccionado"
 													: `${textoTemas(elegidas)} ${elegidas === 1 ? "seleccionado" : "seleccionados"}`
 											}`}
-											onClick={() => setGrupoAbierto(abierto ? null : grupo.nombre)}
+											onClick={(evento) => alternarPanel(evento, grupo.nombre, abierto)}
 											className={`group flex w-full flex-col items-center gap-2 rounded-2xl p-1 text-center focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 ${ESTILOS_SENAL[grupo.senal].foco}`}
 										>
 											<span className="relative transition motion-safe:group-hover:-translate-y-[3px] motion-safe:group-hover:rotate-3">
@@ -416,6 +441,7 @@ export default function CategorySelector({
 								className={`absolute -top-2 h-4 w-4 rotate-45 ${ESTILOS_SENAL[grupoActual.senal].fondoTinte}`}
 							/>
 							<section
+								id={idPanel}
 								aria-label={`Temas de ${grupoActual.nombre}`}
 								className={`min-h-0 overflow-hidden rounded-3xl ${ESTILOS_SENAL[grupoActual.senal].fondoTinte}`}
 							>
@@ -426,6 +452,7 @@ export default function CategorySelector({
 										</p>
 										<button
 											type="button"
+											ref={accionGrupoRef}
 											onClick={() => alternarGrupo(grupoActual.categorias)}
 											className={`rounded-lg border-2 bg-white px-3 py-1 text-sm font-semibold ${ESTILOS_SENAL[grupoActual.senal].borde} ${ESTILOS_SENAL[grupoActual.senal].tinta} focus-visible:outline focus-visible:outline-[3px] focus-visible:outline-offset-2 ${ESTILOS_SENAL[grupoActual.senal].foco}`}
 										>

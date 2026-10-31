@@ -182,6 +182,88 @@ describe("búsqueda", () => {
 	});
 });
 
+describe("teclado y foco", () => {
+	const clicDeRaton = (elemento) =>
+		act(async () => {
+			elemento.dispatchEvent(new MouseEvent("click", { bubbles: true, detail: 1 }));
+		});
+	const pulsarEscape = (elemento) =>
+		act(async () => {
+			elemento.dispatchEvent(new KeyboardEvent("keydown", { key: "Escape", bubbles: true }));
+		});
+
+	it("al abrir un grupo con el teclado el foco entra en el panel", async () => {
+		await pintar();
+		const senal = boton("Organización Preventiva");
+		senal.focus();
+		await act(async () => senal.click());
+		expect(document.activeElement.textContent.trim()).toBe("Elegir todo el grupo");
+		expect(document.activeElement.closest("section").getAttribute("aria-label"))
+			.toBe("Temas de Organización Preventiva");
+	});
+
+	it("al abrir un grupo con el ratón el foco se queda en la señal", async () => {
+		await pintar();
+		const senal = boton("Organización Preventiva");
+		senal.focus();
+		await clicDeRaton(senal);
+		expect(contenedor.querySelector("section[aria-label^='Temas de']")).not.toBeNull();
+		expect(document.activeElement).toBe(senal);
+	});
+
+	it("al cerrar un grupo no se mueve el foco al panel", async () => {
+		await pintar();
+		await pulsar("Organización Preventiva");
+		const senal = boton("Organización Preventiva");
+		senal.focus();
+		await act(async () => senal.click());
+		expect(contenedor.querySelector("section[aria-label^='Temas de']")).toBeNull();
+		expect(document.activeElement).toBe(senal);
+	});
+
+	it("Escape dentro del panel lo cierra y devuelve el foco a su señal", async () => {
+		await pintar();
+		await pulsar("Organización Preventiva");
+		const pegatina = boton("Plan de Prevención, 5 preguntas");
+		pegatina.focus();
+		await pulsarEscape(pegatina);
+		expect(contenedor.querySelector("section[aria-label^='Temas de']")).toBeNull();
+		expect(document.activeElement).toBe(boton("Organización Preventiva"));
+		expect(boton("Organización Preventiva").getAttribute("aria-expanded")).toBe("false");
+	});
+
+	it("Escape sobre la señal abierta también cierra el grupo", async () => {
+		await pintar();
+		await pulsar("Organización Preventiva");
+		await pulsarEscape(boton("Organización Preventiva"));
+		expect(contenedor.querySelector("section[aria-label^='Temas de']")).toBeNull();
+	});
+
+	it("Escape en otra zona no cierra el grupo abierto", async () => {
+		await pintar();
+		await pulsar("Organización Preventiva");
+		await pulsarEscape(boton("Sorpréndeme"));
+		expect(contenedor.querySelector("section[aria-label^='Temas de']")).not.toBeNull();
+	});
+
+	it("con búsqueda activa Escape borra solo la búsqueda", async () => {
+		await pintar();
+		await pulsar("Organización Preventiva");
+		await escribir("ley");
+		await pulsarEscape(contenedor.querySelector("input"));
+		expect(contenedor.querySelector("input").value).toBe("");
+		expect(contenedor.querySelector("section[aria-label^='Temas de']")).not.toBeNull();
+	});
+
+	it("la señal abierta apunta a su panel con aria-controls", async () => {
+		await pintar();
+		expect(boton("Organización Preventiva").hasAttribute("aria-controls")).toBe(false);
+		await pulsar("Organización Preventiva");
+		const id = boton("Organización Preventiva").getAttribute("aria-controls");
+		expect(contenedor.querySelector(`section[id="${id}"]`)).not.toBeNull();
+	});
+});
+
 describe("acciones y contador", () => {
 	it("«Sorpréndeme» elige tres temas de grupos distintos con al menos 10 preguntas", async () => {
 		vi.spyOn(Math, "random").mockReturnValue(0);
