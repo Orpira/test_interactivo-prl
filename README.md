@@ -23,8 +23,8 @@ Aplicación interactiva para practicar y evaluar conocimientos de Prevención de
 | Socket.IO 4 | Comunicación en tiempo real |
 | Vitest | Pruebas unitarias y de integración |
 
-El proyecto usa JavaScript y módulos ES. Se requiere Node.js 20 o superior y npm 9 o superior.
-Las comprobaciones de desarrollo se han realizado con Node.js 22. Si usas nvm, selecciona esa versión con `nvm install 22` y `nvm use 22`.
+El proyecto usa JavaScript y módulos ES. Para ejecutar la aplicación y el servidor se requiere Node.js 20 o superior y npm 9 o superior.
+Las pruebas (Vitest 5) necesitan Node.js 22.12 o superior. Las comprobaciones de desarrollo se han realizado con Node.js 22. Si usas nvm, selecciona esa versión con `nvm install 22` y `nvm use 22`.
 
 ## Identidad visual
 
