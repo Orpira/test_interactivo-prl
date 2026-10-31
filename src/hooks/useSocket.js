@@ -1,21 +1,29 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { io } from "socket.io-client";
 
 export default function useSocket() {
-	const socketRef = useRef(null);
+	const [socket, setSocket] = useState(null);
 	const [conectado, setConectado] = useState(false);
+	const [conexionComprobada, setConexionComprobada] = useState(false);
 
 	useEffect(() => {
-		const socket = io({ transports: ["websocket", "polling"] });
-		socketRef.current = socket;
+		const socketUrl = import.meta.env.VITE_SOCKET_URL || undefined;
+		const cliente = io(socketUrl, { transports: ["websocket", "polling"] });
+		const timeout = setTimeout(() => setConexionComprobada(true), 5000);
+		setSocket(cliente);
 
-		socket.on("connect", () => setConectado(true));
-		socket.on("disconnect", () => setConectado(false));
+		cliente.on("connect", () => {
+			clearTimeout(timeout);
+			setConexionComprobada(true);
+			setConectado(true);
+		});
+		cliente.on("disconnect", () => setConectado(false));
 
 		return () => {
-			socket.disconnect();
+			clearTimeout(timeout);
+			cliente.disconnect();
 		};
 	}, []);
 
-	return { socket: socketRef.current, conectado };
+	return { socket, conectado, conexionComprobada };
 }
