@@ -1,6 +1,7 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 import configuracion from "../tailwind.config.js";
+import { ESTILOS_SENAL } from "./utils/estilosSenal.js";
 
 const { colors: colores, fontFamily: fuentes } = configuracion.theme.extend;
 
@@ -59,5 +60,35 @@ describe("identidad visual", () => {
 			expect(contraste(colores.primary.DEFAULT, fondo), `Foco sobre ${fondo}`)
 				.toBeGreaterThanOrEqual(3);
 		}
+	});
+
+	describe("colores de señalización", () => {
+		const tipos = Object.entries(colores.senal);
+
+		it.each(tipos)("%s: texto legible sobre el sólido y sobre el tinte", (_, color) => {
+			expect(contraste(color.on, color.DEFAULT)).toBeGreaterThanOrEqual(4.5);
+			expect(contraste(color.ink, color.tint)).toBeGreaterThanOrEqual(4.5);
+			expect(contraste(color.ink, colores.card)).toBeGreaterThanOrEqual(4.5);
+		});
+
+		it("el foco de cada señal alcanza 3:1 sobre el fondo", () => {
+			for (const [tipo, color] of tipos) {
+				const foco = ESTILOS_SENAL[tipo].foco.endsWith("outline-ink")
+					? colores.ink.DEFAULT
+					: color.DEFAULT;
+				for (const fondo of [colores.bg, colores.card, color.tint]) {
+					expect(contraste(foco, fondo), `${tipo} sobre ${fondo}`).toBeGreaterThanOrEqual(3);
+				}
+			}
+		});
+
+		it("cada tipo define todas las clases con su nombre literal", () => {
+			for (const [tipo, estilos] of Object.entries(ESTILOS_SENAL)) {
+				expect(estilos.solido).toContain(`senal-${tipo}`);
+				expect(estilos.tinte).toContain(`senal-${tipo}-tint`);
+				expect(estilos.anillo).toBe(`ring-senal-${tipo}`);
+			}
+			expect(Object.keys(ESTILOS_SENAL).sort()).toEqual(Object.keys(colores.senal).sort());
+		});
 	});
 });
