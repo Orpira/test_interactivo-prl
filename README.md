@@ -6,7 +6,7 @@ Aplicación interactiva para practicar y evaluar conocimientos de Prevención de
 
 - **Banco actualizado:** 170 preguntas en 26 categorías.
 - **Opciones aleatorias:** cada intento baraja preguntas y opciones, conservando el índice de la respuesta correcta.
-- **Selector temático:** grupos que solo muestran categorías disponibles, búsqueda y selección de todas las categorías del banco.
+- **Selector temático con señales de seguridad:** cada grupo es una señal (obligación, advertencia, salvamento) y sus categorías son pegatinas cuyo tamaño depende del número de preguntas. Incluye búsqueda sin tildes, «Sorpréndeme», «Todas» y un contador flotante que muestra el total calculado a partir del banco.
 - **Modos de juego:** individual, multijugador por turnos con el mismo test y salas en red.
 - **Corrección en red del lado del servidor:** las respuestas correctas no se envían antes de responder y el ranking se calcula con respuestas validadas.
 - **Temporizador opcional:** 15/30/45/60 segundos por pregunta o 5/10/15/20 minutos por test.
@@ -51,13 +51,16 @@ La paleta está definida en `tailwind.config.js`. Para conservar contraste AA, e
     ├── identidad.test.js
     ├── components/
     │   ├── CategorySelector.jsx
+    │   ├── CategorySelector.test.jsx
     │   ├── Features.jsx
     │   ├── Footer.jsx
     │   ├── Hero.jsx
     │   ├── PreviewEditor.jsx
     │   ├── QuizOnline.jsx
     │   ├── RankingSummary.jsx
-    │   └── Sala.jsx
+    │   ├── Sala.jsx
+    │   ├── Senal.jsx
+    │   └── Senal.test.jsx
     ├── hooks/useSocket.js
     ├── server/
     │   ├── salas.js
@@ -66,6 +69,7 @@ La paleta está definida en `tailwind.config.js`. Para conservar contraste AA, e
         ├── banco.test.js
         ├── categorias.js
         ├── categorias.test.js
+        ├── estilosSenal.js
         ├── quiz.js
         └── quiz.test.js
 ```
