@@ -21,7 +21,7 @@ export default function QuizPRL({
 	resultados,
 	setMostrarRanking,
 	onModoRed,
-	socketConectado,
+	redDisponible,
 	conexionComprobada,
 }) {
 	const [todasPreguntas, setTodasPreguntas] = useState([]);
@@ -363,12 +363,12 @@ export default function QuizPRL({
 					</button>
 					<button
 						onClick={onModoRed}
-						disabled={!socketConectado}
+						disabled={!redDisponible}
 						className="min-w-40 border border-line bg-card text-ink px-6 py-5 rounded-xl font-semibold hover:bg-surface hover:border-primary transition text-lg flex flex-col items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						<Globe aria-hidden="true" size={20} strokeWidth={1.75} />
 						En Red
-						{!socketConectado && (
+						{!redDisponible && (
 							<span className="text-xs font-normal text-ink-muted">
 								{conexionComprobada ? "No disponible ahora" : "Conectando…"}
 							</span>

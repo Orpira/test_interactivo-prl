@@ -395,6 +395,7 @@ export class GestorSalas {
 			timerConfig: { ...sala.timerConfig },
 			jugadores: [...sala.jugadores.values()].map((otro) => ({
 				nombre: otro.nombre,
+				anfitrion: otro.sessionId === sala.anfitrion,
 				conectado: this.#conectado(otro, ahora),
 				terminado: otro.terminado,
 			})),

@@ -87,7 +87,7 @@ describe("crear y unirse", () => {
 			nombre: "Ana",
 			totalPreguntas: 5,
 		});
-		expect(vista.jugadores).toEqual([{ nombre: "Ana", conectado: true, terminado: false }]);
+		expect(vista.jugadores).toEqual([{ nombre: "Ana", anfitrion: true, conectado: true, terminado: false }]);
 	});
 
 	it("rechaza datos de sala no válidos", () => {
@@ -380,6 +380,7 @@ describe("anfitrión", () => {
 		expect(gestor.vista(codigo, sesiones[1]).soyAnfitrion).toBe(false);
 		expect(gestor.vista(codigo, sesiones[2]).soyAnfitrion).toBe(true);
 		expect(gestor.vista(codigo, sesiones[2]).jugadores.map((j) => j.nombre)).toEqual(["Luis", "Eva", "Raúl"]);
+		expect(gestor.vista(codigo, sesiones[2]).jugadores.filter((j) => j.anfitrion).map((j) => j.nombre)).toEqual(["Eva"]);
 		esperarError("SIN_SESION", () => gestor.vista(codigo, sesiones[0]));
 	});
 

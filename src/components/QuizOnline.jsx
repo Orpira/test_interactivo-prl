@@ -1,5 +1,10 @@
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Timer, Trophy } from "lucide-react";
+import { responder as apiResponder } from "../api/salas.js";
+
+// Un reenvío por un corte de red usa siempre el mismo comandoId: no cuenta dos veces.
+export const ESPERAS_REINTENTO_MS = [1000, 2000, 4000];
+export const AVANCE_AUTOMATICO_MS = 2500;
 
 function formatearTiempo(segundos) {
 	if (segundos === null || segundos === undefined) return "";
@@ -8,204 +13,158 @@ function formatearTiempo(segundos) {
 	return `${min}:${seg.toString().padStart(2, "0")}`;
 }
 
-export default function QuizOnline({
-	socket,
-	preguntas,
-	nombre,
-	codigoSala,
-	timerConfig: timerConfigProp,
-	onVolverInicio,
-}) {
-	const timerConfig = timerConfigProp || {
-		activo: false,
-		tipo: null,
-		segundos: null,
+// randomUUID solo existe en contextos seguros (https o localhost); en una red local por http no.
+export function generarComandoId() {
+	const criptografia = globalThis.crypto;
+	if (criptografia?.randomUUID) return criptografia.randomUUID();
+	const bytes = new Uint8Array(16);
+	if (criptografia?.getRandomValues) criptografia.getRandomValues(bytes);
+	else for (let i = 0; i < bytes.length; i++) bytes[i] = Math.floor(Math.random() * 256);
+	return [...bytes].map((byte) => byte.toString(16).padStart(2, "0")).join("");
+}
+
+const esperar = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
+
+function reconstruirRespuesta(vista, indice) {
+	const respuesta = vista.progreso.respuestas.find((r) => r.indice === indice);
+	if (!respuesta) return null;
+	return {
+		indice,
+		seleccion: respuesta.opcion,
+		correcta: respuesta.correcta,
+		acierto: respuesta.acierto,
+		fueraDeTiempo: false,
 	};
-	const [indice, setIndice] = useState(0);
-	const [seleccion, setSeleccion] = useState(null);
-	const [respuestaCorrecta, setRespuestaCorrecta] = useState(null);
-	const [aciertos, setAciertos] = useState(0);
-	const [respondida, setRespondida] = useState(false);
+}
+
+export default function QuizOnline({
+	vista,
+	sesion,
+	ahoraServidor,
+	aplicarVista,
+	recargar,
+	reconectando = false,
+	onSalir,
+}) {
+	const [mostrando, setMostrando] = useState(null);
+	const [opcionPendiente, setOpcionPendiente] = useState(null);
 	const [enviando, setEnviando] = useState(false);
+	const [reintentando, setReintentando] = useState(false);
 	const [errorRespuesta, setErrorRespuesta] = useState("");
-	const [esperandoResultado, setEsperandoResultado] = useState(false);
-	const [finalizado, setFinalizado] = useState(false);
-	const [ranking, setRanking] = useState([]);
-	const [terminados, setTerminados] = useState(0);
-	const [totalJugadores, setTotalJugadores] = useState(0);
-	const [completo, setCompleto] = useState(false);
-	const [tiempoRestante, setTiempoRestante] = useState(null);
-	const indiceRef = useRef(indice);
-	const aciertosRef = useRef(aciertos);
-	const respondidaRef = useRef(respondida);
-	const finalizadoRef = useRef(finalizado);
-	const timeoutAvanceRef = useRef(null);
-	const timeoutFinalRef = useRef(null);
-	const opcionPendienteRef = useRef(null);
-	indiceRef.current = indice;
-	aciertosRef.current = aciertos;
-	respondidaRef.current = respondida;
-	finalizadoRef.current = finalizado;
-
-	function cancelarTimeouts() {
-		clearTimeout(timeoutAvanceRef.current);
-		clearTimeout(timeoutFinalRef.current);
-		timeoutAvanceRef.current = null;
-		timeoutFinalRef.current = null;
-	}
-
-	function avanzarPregunta() {
-		if (indiceRef.current + 1 >= preguntas.length) {
-			setFinalizado(true);
-			finalizadoRef.current = true;
-			return;
-		}
-		const siguienteIndice = indiceRef.current + 1;
-		setIndice(siguienteIndice);
-		indiceRef.current = siguienteIndice;
-		setSeleccion(null);
-		setRespuestaCorrecta(null);
-		setRespondida(false);
-		respondidaRef.current = false;
-		setErrorRespuesta("");
-	}
-
-	function programarCierreRanking() {
-		clearTimeout(timeoutFinalRef.current);
-		timeoutFinalRef.current = setTimeout(() => {
-			setFinalizado(true);
-			finalizadoRef.current = true;
-			timeoutFinalRef.current = null;
-		}, 1500);
-	}
+	const [, setLatido] = useState(0);
+	const enviandoRef = useRef(false);
+	const montado = useRef(true);
+	const comandoPendiente = useRef(null);
+	const preguntasConocidas = useRef([]);
 
 	useEffect(() => {
-		if (!socket) return;
-		function onRanking(data) {
-			setRanking(data.ranking);
-			setTerminados(data.terminados);
-			setTotalJugadores(data.totalJugadores);
-			setCompleto(data.completo);
-			if (data.ranking.some((resultado) => resultado.id === socket.id)) {
-				programarCierreRanking();
+		montado.current = true;
+		return () => {
+			montado.current = false;
+		};
+	}, []);
+
+	if (vista.preguntas) preguntasConocidas.current = vista.preguntas;
+	const preguntas = vista.preguntas ?? preguntasConocidas.current;
+	const total = vista.totalPreguntas;
+	const siguiente = vista.progreso.siguiente;
+	const terminadoServidor = vista.progreso.terminado || siguiente >= total;
+	const timerConfig = vista.timerConfig;
+	const hasta = vista.limite.hasta;
+
+	// El reloj se repinta cada 250 ms; el servidor es quien decide cuándo vence el tiempo.
+	useEffect(() => {
+		if (hasta === null) return undefined;
+		const id = setInterval(() => setLatido((valor) => valor + 1), 250);
+		return () => clearInterval(id);
+	}, [hasta]);
+
+	// Si un envío falló tras los reintentos pero el servidor sí lo procesó, se recupera su resultado.
+	useEffect(() => {
+		const pendiente = comandoPendiente.current;
+		if (!pendiente || siguiente <= pendiente.indice) return;
+		comandoPendiente.current = null;
+		setErrorRespuesta("");
+		setMostrando(reconstruirRespuesta(vista, pendiente.indice));
+	}, [vista, siguiente]);
+
+	const avanzar = useCallback(() => setMostrando(null), []);
+
+	useEffect(() => {
+		if (!mostrando || timerConfig.tipo !== "pregunta") return undefined;
+		const id = setTimeout(avanzar, AVANCE_AUTOMATICO_MS);
+		return () => clearTimeout(id);
+	}, [mostrando, timerConfig.tipo, avanzar]);
+
+	async function enviarConReintentos(comando) {
+		for (let intento = 0; ; intento++) {
+			try {
+				return await apiResponder(sesion.codigo, sesion.sessionId, comando);
+			} catch (fallo) {
+				if (!fallo.reintentable || intento >= ESPERAS_REINTENTO_MS.length) throw fallo;
+				if (montado.current) setReintentando(true);
+				const espera = fallo.reintentarEnSegundos
+					? Math.max(ESPERAS_REINTENTO_MS[intento], fallo.reintentarEnSegundos * 1000)
+					: ESPERAS_REINTENTO_MS[intento];
+				await esperar(espera);
+				if (!montado.current) throw fallo;
 			}
 		}
+	}
 
-		socket.on("ranking-actualizado", onRanking);
-		return () => socket.off("ranking-actualizado", onRanking);
-	}, [socket]);
-
-	useEffect(() => {
-		if (
-			finalizado ||
-			!timerConfig.activo ||
-			tiempoRestante === null ||
-			tiempoRestante <= 0
-		) {
-			return;
-		}
-		const id = setTimeout(() => setTiempoRestante((prev) => prev - 1), 1000);
-		return () => clearTimeout(id);
-	}, [tiempoRestante, finalizado, timerConfig.activo]);
-
-	useEffect(() => {
-		if (finalizado || !timerConfig.activo || timerConfig.tipo !== "pregunta")
-			return;
-		setTiempoRestante(timerConfig.segundos);
-	}, [indice, timerConfig, finalizado]);
-
-	useEffect(() => {
-		if (finalizado || !timerConfig.activo || timerConfig.tipo !== "test") return;
-		setTiempoRestante(timerConfig.segundos);
-	}, [timerConfig, finalizado]);
-
-	function enviarRespuesta(opcion) {
-		if (
-			respondidaRef.current ||
-			finalizadoRef.current ||
-			!socket ||
-			!preguntas[indiceRef.current]
-		) {
-			return;
-		}
-		respondidaRef.current = true;
-		opcionPendienteRef.current = opcion;
+	async function enviar(comando) {
+		enviandoRef.current = true;
 		setEnviando(true);
 		setErrorRespuesta("");
-		if (timerConfig.tipo === "pregunta") setTiempoRestante(null);
-
-		socket.timeout(5000).emit(
-			"responder",
-			{ indice: indiceRef.current, opcion },
-			(error, respuesta) => {
+		setOpcionPendiente(comando.opcion);
+		try {
+			const resultado = await enviarConReintentos(comando);
+			if (!montado.current) return;
+			comandoPendiente.current = null;
+			aplicarVista(resultado.vista);
+			setMostrando({
+				indice: comando.indice,
+				seleccion: comando.opcion,
+				correcta: resultado.correcta,
+				acierto: resultado.acierto,
+				fueraDeTiempo: resultado.fueraDeTiempo,
+			});
+		} catch (fallo) {
+			if (!montado.current) return;
+			if (fallo.reintentable) {
+				// Se conserva el comando: "Reintentar" lo reenvía con el mismo comandoId.
+				comandoPendiente.current = comando;
+				setErrorRespuesta("No se pudo enviar la respuesta. Reinténtalo.");
+			} else {
+				comandoPendiente.current = null;
+				setErrorRespuesta(fallo.message || "No se pudo enviar la respuesta.");
+				recargar();
+			}
+		} finally {
+			enviandoRef.current = false;
+			if (montado.current) {
 				setEnviando(false);
-				if (error || !respuesta?.ok) {
-					respondidaRef.current = false;
-					setErrorRespuesta(
-						respuesta?.error || "No se pudo enviar la respuesta. Reinténtalo.",
-					);
-					return;
-				}
-
-				setSeleccion(opcion);
-				opcionPendienteRef.current = null;
-				setRespuestaCorrecta(respuesta.correcta);
-				setRespondida(true);
-				setErrorRespuesta("");
-				if (respuesta.acierto) {
-					setAciertos((prev) => prev + 1);
-					aciertosRef.current++;
-				}
-
-				if (opcion === null && indiceRef.current + 1 < preguntas.length) {
-					timeoutAvanceRef.current = setTimeout(() => {
-						timeoutAvanceRef.current = null;
-						avanzarPregunta();
-					}, 2000);
-				} else if (opcion === null) {
-					timeoutFinalRef.current = setTimeout(() => {
-						timeoutFinalRef.current = null;
-						setFinalizado(true);
-						finalizadoRef.current = true;
-					}, 2000);
-				}
-			},
-		);
-	}
-
-	useEffect(() => {
-		if (
-			tiempoRestante !== 0 ||
-			!timerConfig.activo ||
-			finalizadoRef.current ||
-			respondidaRef.current
-		) {
-			return;
-		}
-		if (timerConfig.tipo === "pregunta") {
-			enviarRespuesta(null);
-		} else if (timerConfig.tipo === "test") {
-			setEsperandoResultado(true);
-		}
-	}, [tiempoRestante, timerConfig]);
-
-	useEffect(() => () => cancelarTimeouts(), []);
-
-	const preguntaActual = preguntas[indice];
-
-	function siguiente() {
-		cancelarTimeouts();
-		if (indice + 1 < preguntas.length) {
-			avanzarPregunta();
-		} else {
-			cancelarTimeouts();
-			setFinalizado(true);
-			finalizadoRef.current = true;
+				setReintentando(false);
+				setOpcionPendiente(null);
+			}
 		}
 	}
 
-	if (finalizado) {
-		const miResultado = ranking.find((resultado) => resultado.id === socket.id);
+	function elegirOpcion(opcion) {
+		if (mostrando || enviandoRef.current || comandoPendiente.current || terminadoServidor) return;
+		enviar({ comandoId: generarComandoId(), indice: siguiente, opcion });
+	}
+
+	function reintentar() {
+		if (comandoPendiente.current && !enviandoRef.current) enviar(comandoPendiente.current);
+	}
+
+	const ranking = vista.ranking;
+	const completo = vista.estado === "TERMINADA";
+
+	if (!mostrando && terminadoServidor) {
+		const miResultado = ranking.find((fila) => fila.nombre === vista.nombre);
+		const terminados = ranking.filter((fila) => fila.terminado).length;
 		return (
 			<section id="quiz" className="bg-bg px-4 py-10 md:p-12 text-center text-ink">
 				<h2 className="text-4xl font-display mb-2 inline-flex items-center gap-3 justify-center">
@@ -219,8 +178,13 @@ export default function QuizOnline({
 					)}
 				</h2>
 				<p className="text-ink-muted mb-6 font-mono text-sm">
-					Sala {codigoSala} — {terminados}/{totalJugadores} han terminado
+					Sala {vista.codigo} — {terminados}/{ranking.length} han terminado
 				</p>
+				{reconectando && (
+					<p role="status" className="mb-4 text-sm text-signal-ink font-semibold">
+						Reconectando…
+					</p>
+				)}
 
 				{miResultado && !completo && (
 					<div className="max-w-md mx-auto bg-surface p-4 rounded-xl border border-line mb-4">
@@ -229,7 +193,9 @@ export default function QuizOnline({
 							<span className="font-mono font-bold text-ok-ink">
 								{miResultado.porcentaje}%
 							</span>{" "}
-							<span className="font-mono">({miResultado.aciertos}/{miResultado.total})</span>
+							<span className="font-mono">
+								({miResultado.aciertos}/{miResultado.total})
+							</span>
 						</p>
 					</div>
 				)}
@@ -246,13 +212,11 @@ export default function QuizOnline({
 								</tr>
 							</thead>
 							<tbody>
-								{ranking.map((resultado, posicion) => (
+								{ranking.map((fila, posicion) => (
 									<tr
-										key={resultado.id}
+										key={fila.nombre}
 										className={`border-t border-line ${
-											resultado.id === socket.id
-												? "bg-surface font-bold"
-												: ""
+											fila.nombre === vista.nombre ? "bg-surface font-bold" : ""
 										}`}
 									>
 										<td className="p-3 font-mono font-bold">
@@ -267,14 +231,18 @@ export default function QuizOnline({
 												: posicion + 1}
 										</td>
 										<td className="p-3">
-											{resultado.nombre}{" "}
-											{resultado.id === socket.id && "(tú)"}
+											{fila.nombre} {fila.nombre === vista.nombre && "(tú)"}
+											{!fila.terminado && (
+												<span className="ml-2 text-xs font-normal text-ink-soft">
+													respondiendo…
+												</span>
+											)}
 										</td>
 										<td className="p-3 text-right font-mono">
-											{resultado.aciertos}/{resultado.total}
+											{fila.aciertos}/{fila.total}
 										</td>
 										<td className="p-3 text-right font-mono font-semibold">
-											{resultado.porcentaje}%
+											{fila.porcentaje}%
 										</td>
 									</tr>
 								))}
@@ -283,60 +251,95 @@ export default function QuizOnline({
 					</div>
 				)}
 
-				{completo && (
-					<div className="mt-6">
+				<div className="mt-6 flex flex-col items-center gap-3">
+					{completo && (
 						<button
-							onClick={onVolverInicio}
+							onClick={onSalir}
 							className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition"
 						>
 							Nueva sesión
 						</button>
-					</div>
-				)}
+					)}
+					{!completo && (
+						<button onClick={onSalir} className="text-ink-muted underline text-sm">
+							Salir de la sala
+						</button>
+					)}
+				</div>
 			</section>
 		);
 	}
 
-	if (!preguntaActual) return null;
+	const indiceMostrado = mostrando ? mostrando.indice : siguiente;
+	const preguntaActual = preguntas[indiceMostrado];
+	if (!preguntaActual) {
+		return (
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<p role="status" className="text-lg">
+					Cargando la pregunta…
+				</p>
+			</section>
+		);
+	}
+
+	const mostrarReloj =
+		hasta !== null && (timerConfig.tipo === "test" || (timerConfig.tipo === "pregunta" && !mostrando));
+	const restante = mostrarReloj
+		? Math.max(0, Math.ceil((hasta - ahoraServidor()) / 1000))
+		: null;
+	const umbralRojo = timerConfig.tipo === "pregunta" ? 5 : 30;
+	const umbralAmarillo = timerConfig.tipo === "pregunta" ? 10 : 60;
+	const sinTiempo = restante === 0 && !mostrando;
 
 	return (
 		<section id="quiz" className="bg-bg px-4 py-10 md:p-12 text-ink">
 			<h2 className="text-4xl font-display mb-1 text-center">Test de PRL</h2>
 			<p className="text-center text-sm text-ink-muted mb-1">
-				{nombre} · Sala <span className="font-mono">{codigoSala}</span>
+				{vista.nombre} · Sala <span className="font-mono">{vista.codigo}</span>
 			</p>
 			<p className="text-center text-sm text-ink-muted mb-4 font-mono">
-				Pregunta {indice + 1} / {preguntas.length} ·{" "}
-				<span className="font-semibold text-ok-ink">{aciertos} aciertos</span>
-				{timerConfig.activo && tiempoRestante !== null && (
+				Pregunta {indiceMostrado + 1} / {total} ·{" "}
+				<span className="font-semibold text-ok-ink">{vista.progreso.aciertos} aciertos</span>
+				{restante !== null && (
 					<>
 						{" "}
 						·{" "}
 						<span
 							className={`font-mono font-bold ${
-								tiempoRestante <= (timerConfig.tipo === "pregunta" ? 5 : 30)
+								restante <= umbralRojo
 									? "text-ko"
-									: tiempoRestante <=
-										  (timerConfig.tipo === "pregunta" ? 10 : 60)
+									: restante <= umbralAmarillo
 										? "bg-signal text-ink rounded px-1"
 										: "text-ink-soft"
 							}`}
 						>
 							<Timer aria-hidden="true" size={20} strokeWidth={1.75} className="inline" />{" "}
-							{formatearTiempo(tiempoRestante)}
+							{formatearTiempo(restante)}
 						</span>
 					</>
 				)}
 			</p>
-			{esperandoResultado && (
-				<p role="status" className="text-center text-ink-muted mb-4">
-					Tiempo agotado. Calculando resultado…
+			{reconectando && (
+				<p role="status" className="text-center text-signal-ink font-semibold mb-2">
+					Reconectando…
 				</p>
 			)}
-			{respondida && seleccion === null && tiempoRestante === 0 && (
-				<p className="text-center text-ko font-semibold mb-2">
-					<Timer aria-hidden="true" size={20} strokeWidth={1.75} className="inline" /> ¡Tiempo
-					agotado!
+			{reintentando && (
+				<p role="status" className="text-center text-signal-ink font-semibold mb-2">
+					Reconectando… reenviando tu respuesta
+				</p>
+			)}
+			{sinTiempo && (
+				<p role="status" className="text-center text-ko font-semibold mb-2">
+					<Timer aria-hidden="true" size={20} strokeWidth={1.75} className="inline" />{" "}
+					{timerConfig.tipo === "test"
+						? "Tiempo agotado. Calculando resultado…"
+						: "¡Tiempo agotado!"}
+				</p>
+			)}
+			{mostrando?.fueraDeTiempo && (
+				<p role="status" className="text-center text-ko font-semibold mb-2">
+					Tu respuesta llegó fuera de tiempo y no cuenta.
 				</p>
 			)}
 			<div className="max-w-2xl mx-auto bg-card p-5 md:p-8 rounded-2xl border border-line shadow-sm">
@@ -348,15 +351,15 @@ export default function QuizOnline({
 					{preguntaActual.opciones.map((opcion, indiceOpcion) => {
 						let estilo =
 							"border p-3 rounded-xl cursor-pointer transition text-left w-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary";
-						if (respondida) {
-							if (indiceOpcion === respuestaCorrecta) {
+						if (mostrando) {
+							if (indiceOpcion === mostrando.correcta) {
 								estilo += " bg-ok-bg border-ok text-ok-ink";
-							} else if (indiceOpcion === seleccion) {
+							} else if (indiceOpcion === mostrando.seleccion) {
 								estilo += " bg-ko-bg border-ko text-ko-ink";
 							} else {
 								estilo += " border-line text-ink-muted";
 							}
-						} else if (indiceOpcion === seleccion) {
+						} else if (indiceOpcion === opcionPendiente) {
 							estilo += " border-primary bg-surface";
 						} else {
 							estilo += " border-line hover:bg-surface";
@@ -365,9 +368,9 @@ export default function QuizOnline({
 							<button
 								key={indiceOpcion}
 								type="button"
-								disabled={respondida || enviando || esperandoResultado}
+								disabled={Boolean(mostrando) || enviando || Boolean(comandoPendiente.current)}
 								className={estilo}
-								onClick={() => enviarRespuesta(indiceOpcion)}
+								onClick={() => elegirOpcion(indiceOpcion)}
 							>
 								<span className="font-semibold mr-2">
 									{String.fromCharCode(65 + indiceOpcion)}.
@@ -382,24 +385,24 @@ export default function QuizOnline({
 						<p role="alert" className="text-ko text-sm">
 							{errorRespuesta}
 						</p>
-						<button
-							type="button"
-							onClick={() => enviarRespuesta(opcionPendienteRef.current)}
-							className="underline text-sm text-ink-soft"
-						>
-							Reintentar
-						</button>
+						{comandoPendiente.current && (
+							<button
+								type="button"
+								onClick={reintentar}
+								className="underline text-sm text-ink-soft"
+							>
+								Reintentar
+							</button>
+						)}
 					</div>
 				)}
-				{respondida && seleccion !== null && (
+				{mostrando && (
 					<div className="mt-4 text-right">
 						<button
-							onClick={siguiente}
+							onClick={avanzar}
 							className="bg-primary hover:bg-primary-dark text-white px-5 py-2 rounded-lg font-semibold transition"
 						>
-							{indice + 1 < preguntas.length
-								? "Siguiente →"
-								: "Ver resultado"}
+							{mostrando.indice + 1 < total ? "Siguiente →" : "Ver resultado"}
 						</button>
 					</div>
 				)}

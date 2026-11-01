@@ -4,13 +4,16 @@ import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import App from "./App.jsx";
 import Sala from "./components/Sala.jsx";
+import { salirSala, verSala } from "./api/salas.js";
+import { CLAVE_SESION } from "./api/sesion.js";
 
-vi.mock("./hooks/useSocket.js", () => ({
-	default: () => ({
-		socket: null,
-		conectado: false,
-		conexionComprobada: true,
-	}),
+vi.mock("./hooks/useDisponibilidadRed.js", () => ({
+	default: () => ({ disponible: false, comprobada: true }),
+}));
+vi.mock("./api/salas.js", async (importarOriginal) => ({
+	...(await importarOriginal()),
+	verSala: vi.fn(),
+	salirSala: vi.fn().mockResolvedValue({ ok: true }),
 }));
 
 const preguntas = Array.from({ length: 10 }, (_, indice) => ({
@@ -78,6 +81,70 @@ async function responder(cantidad = 5) {
 		await pulsar(indice === 4 ? "Ver resultado" : "Siguiente →");
 	}
 }
+
+describe("modo en red al recargar", () => {
+	const vistaEspera = {
+		codigo: "PRL-AB12",
+		estado: "ESPERANDO",
+		soyAnfitrion: false,
+		nombre: "Luis",
+		totalPreguntas: 5,
+		timerConfig: { activo: false, tipo: null, segundos: null },
+		jugadores: [{ nombre: "Ana", anfitrion: true, conectado: true, terminado: false }],
+		progreso: { siguiente: 0, aciertos: 0, terminado: false, respuestas: [] },
+		limite: { tipo: null, hasta: null },
+		ahoraServidor: Date.now(),
+		ranking: [],
+	};
+
+	beforeEach(() => {
+		window.sessionStorage.clear();
+		verSala.mockReset();
+		salirSala.mockClear();
+	});
+
+	it("sin sala guardada arranca en el modo local", async () => {
+		await act(async () => root.render(<App />));
+		expect(contenedor.textContent).toContain("Elige cómo jugar");
+		expect(verSala).not.toHaveBeenCalled();
+	});
+
+	it("con una sala guardada abre el modo en red y vuelve a ella sin pulsar nada", async () => {
+		window.sessionStorage.setItem(
+			CLAVE_SESION,
+			JSON.stringify({ codigo: "PRL-AB12", sessionId: "secreto", nombre: "Luis" }),
+		);
+		verSala.mockResolvedValue(vistaEspera);
+		await act(async () => root.render(<App />));
+		expect(verSala).toHaveBeenCalledWith("PRL-AB12", "secreto", expect.anything());
+		expect(contenedor.textContent).toContain("Sala: PRL-AB12");
+		expect(contenedor.textContent).not.toContain("Elige cómo jugar");
+	});
+
+	it("si la sala guardada ya no existe, vuelve al modo local y limpia la sesión", async () => {
+		window.sessionStorage.setItem(
+			CLAVE_SESION,
+			JSON.stringify({ codigo: "PRL-AB12", sessionId: "secreto", nombre: "Luis" }),
+		);
+		verSala.mockRejectedValue(Object.assign(new Error("Sala no encontrada"), { status: 404, code: "SALA_NO_ENCONTRADA" }));
+		await act(async () => root.render(<App />));
+		expect(window.sessionStorage.getItem(CLAVE_SESION)).toBeNull();
+		expect(contenedor.textContent).toContain("Elige cómo jugar");
+	});
+
+	it("salir de la sala desde la espera vuelve al selector del modo en red", async () => {
+		window.sessionStorage.setItem(
+			CLAVE_SESION,
+			JSON.stringify({ codigo: "PRL-AB12", sessionId: "secreto", nombre: "Luis" }),
+		);
+		verSala.mockResolvedValue(vistaEspera);
+		await act(async () => root.render(<App />));
+		await pulsar("Salir de la sala");
+		expect(salirSala).toHaveBeenCalledWith("PRL-AB12", "secreto");
+		expect(window.sessionStorage.getItem(CLAVE_SESION)).toBeNull();
+		expect(contenedor.textContent).toContain("Modo En Red");
+	});
+});
 
 describe("bienvenida", () => {
 	it("incluye las cinco características dentro de la pantalla de bienvenida", async () => {
@@ -192,7 +259,7 @@ describe("flujo local", () => {
 it("Sala avisa del fallo de carga e impide crear sin preguntas", async () => {
 	fetch.mockRejectedValue(new Error("Sin conexión"));
 	await act(async () => root.render(
-		<Sala socket={null} onTestIniciado={vi.fn()} onVolverInicio={vi.fn()} />,
+		<Sala onEntrar={vi.fn()} onVolverInicio={vi.fn()} />,
 	));
 	expect(contenedor.querySelector('[role="alert"]').textContent).toContain("Sin conexión");
 	expect([...contenedor.querySelectorAll("button")]

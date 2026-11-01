@@ -1,16 +1,24 @@
 import React, { useState, useEffect, useMemo } from "react";
 import { Crown, Globe, Rocket, UserRound, UsersRound } from "lucide-react";
+import { crearSala as apiCrearSala, unirseSala as apiUnirseSala } from "../api/salas.js";
 import CategorySelector from "./CategorySelector";
 
-export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
-	const [fase, setFase] = useState("elegir"); // "elegir" | "crear" | "unirse" | "esperando"
+// Sin `vista` muestra elegir, crear y unirse; con la vista de una sala en espera, la sala de espera.
+export default function Sala({
+	vista = null,
+	reconectando = false,
+	aviso = "",
+	onEntrar,
+	onIniciar,
+	onSalir,
+	onVolverInicio,
+}) {
+	const [fase, setFase] = useState("elegir"); // "elegir" | "crear" | "unirse"
 	const [nombre, setNombre] = useState("");
 	const [codigo, setCodigo] = useState("");
-	const [codigoSala, setCodigoSala] = useState("");
 	const [numPreguntas, setNumPreguntas] = useState(10);
-	const [jugadores, setJugadores] = useState([]);
-	const [esHost, setEsHost] = useState(false);
 	const [error, setError] = useState("");
+	const [enviando, setEnviando] = useState(false);
 	const [todasPreguntas, setTodasPreguntas] = useState([]);
 	const [errorCarga, setErrorCarga] = useState("");
 	const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
@@ -69,44 +77,13 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 		}
 	}, [numPreguntas, opcionesCantidad]);
 
-	useEffect(() => {
-		if (!socket) return;
-
-		function onJugadoresActualizados(lista) {
-			setJugadores(lista);
-		}
-
-		function onTestInicio({ preguntas, timerConfig }) {
-			onTestIniciado({
-				preguntas,
-				codigoSala,
-				nombre: nombre.trim(),
-				timerConfig,
-			});
-		}
-
-		function onEresHost() {
-			setEsHost(true);
-		}
-
-		socket.on("jugadores-actualizados", onJugadoresActualizados);
-		socket.on("test-iniciado", onTestInicio);
-		socket.on("eres-host", onEresHost);
-
-		return () => {
-			socket.off("jugadores-actualizados", onJugadoresActualizados);
-			socket.off("test-iniciado", onTestInicio);
-			socket.off("eres-host", onEresHost);
-		};
-	}, [socket, codigoSala, nombre, onTestIniciado]);
-
-	function crearSala(e) {
+	async function enviarCrear(e) {
 		e.preventDefault();
-		if (!nombre.trim() || preguntasFiltradas.length === 0) return;
+		if (!nombre.trim() || preguntasFiltradas.length === 0 || enviando) return;
 		setError("");
-		socket.emit(
-			"crear-sala",
-			{
+		setEnviando(true);
+		try {
+			const sala = await apiCrearSala({
 				nombre: nombre.trim(),
 				numPreguntas,
 				categorias: categoriasSeleccionadas,
@@ -114,43 +91,115 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 					timerTipo !== "ninguno"
 						? { activo: true, tipo: timerTipo, segundos: timerSegundos }
 						: { activo: false, tipo: null, segundos: null },
-			},
-			(res) => {
-				if (res.ok) {
-					setCodigoSala(res.codigo);
-					setEsHost(true);
-					setJugadores([nombre.trim()]);
-					setFase("esperando");
-				} else {
-					setError(res.error || "Error al crear sala");
-				}
-			},
-		);
+			});
+			onEntrar({ codigo: sala.codigo, sessionId: sala.sessionId, nombre: nombre.trim() });
+		} catch (fallo) {
+			setError(fallo.message || "Error al crear sala");
+		} finally {
+			setEnviando(false);
+		}
 	}
 
-	function unirseSala(e) {
+	async function enviarUnirse(e) {
 		e.preventDefault();
-		if (!nombre.trim() || !codigo.trim()) return;
+		if (!nombre.trim() || !codigo.trim() || enviando) return;
 		setError("");
-		socket.emit(
-			"unirse-sala",
-			{ codigo: codigo.trim().toUpperCase(), nombre: nombre.trim() },
-			(res) => {
-				if (res.ok) {
-					setCodigoSala(codigo.trim().toUpperCase());
-					setEsHost(false);
-					setFase("esperando");
-				} else {
-					setError(res.error || "No se pudo unir");
-				}
-			},
-		);
+		setEnviando(true);
+		try {
+			const sala = await apiUnirseSala(codigo.trim().toUpperCase(), nombre.trim());
+			onEntrar({ codigo: sala.codigo, sessionId: sala.sessionId, nombre: nombre.trim() });
+		} catch (fallo) {
+			setError(fallo.message || "No se pudo unir");
+		} finally {
+			setEnviando(false);
+		}
 	}
 
-	function iniciarTest() {
-		socket.emit("iniciar-test", null, (res) => {
-			if (!res.ok) setError(res.error || "Error al iniciar");
-		});
+	async function iniciarTest() {
+		setError("");
+		setEnviando(true);
+		try {
+			await onIniciar();
+		} catch (fallo) {
+			setError(fallo.message || "Error al iniciar");
+		} finally {
+			setEnviando(false);
+		}
+	}
+
+	// --- PANTALLA: Sala de espera (a partir de la vista del servidor) ---
+	if (vista) {
+		return (
+			<section id="quiz" className="bg-bg p-8 text-center text-ink">
+				<h2 className="text-4xl font-display mb-2">
+					Sala: <span className="font-mono">{vista.codigo}</span>
+				</h2>
+				<p className="text-ink-muted mb-2">
+					Comparte este código con los participantes
+				</p>
+				<p className="text-3xl sm:text-5xl font-mono font-bold text-primary tracking-widest mb-4">
+					{vista.codigo}
+				</p>
+				{reconectando && (
+					<p role="status" className="mb-4 text-sm text-signal-ink font-semibold">
+						Reconectando…
+					</p>
+				)}
+				<div className="max-w-sm mx-auto bg-card border border-line rounded-xl p-4 mb-4">
+					<p className="font-semibold mb-2">
+						Jugadores en la sala (<span className="font-mono">{vista.jugadores.length}</span>):
+					</p>
+					<ul className="text-left">
+						{vista.jugadores.map((jugador) => (
+							<li
+								key={jugador.nombre}
+								className="py-1 border-b border-line last:border-0 flex items-center gap-2"
+							>
+								{jugador.anfitrion ? (
+									<Crown aria-hidden="true" size={20} strokeWidth={1.75} />
+								) : (
+									<UserRound aria-hidden="true" size={20} strokeWidth={1.75} />
+								)}
+								<span className="flex-1">
+									{jugador.nombre}
+									{jugador.nombre === vista.nombre && " (tú)"}
+								</span>
+								<span
+									aria-hidden="true"
+									className={`h-2.5 w-2.5 rounded-full ${
+										jugador.conectado ? "bg-ok" : "border-2 border-ink-muted"
+									}`}
+								/>
+								<span className="sr-only">
+									{jugador.conectado ? "conectado" : "sin conexión"}
+								</span>
+							</li>
+						))}
+					</ul>
+				</div>
+				{error && <p role="alert" className="mb-4 text-ko text-sm">{error}</p>}
+				{vista.soyAnfitrion ? (
+					<button
+						onClick={iniciarTest}
+						disabled={enviando}
+						className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-40 inline-flex items-center gap-2"
+					>
+						Iniciar test ({vista.jugadores.length}{" "}
+						{vista.jugadores.length === 1 ? "jugador" : "jugadores"})
+						<Rocket aria-hidden="true" size={20} strokeWidth={1.75} />
+					</button>
+				) : (
+					<p className="text-ink-muted italic">
+						Esperando a que el anfitrión inicie el test…
+					</p>
+				)}
+				<div>
+					<button onClick={onSalir} className="mt-4 text-ink-muted underline text-sm">
+						Salir de la sala
+					</button>
+				</div>
+			</section>
+		);
 	}
 
 	// --- PANTALLA: Elegir crear o unirse ---
@@ -181,6 +230,11 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 						Unirse a sala
 					</button>
 				</div>
+				{aviso && (
+					<p role="status" className="mt-4 text-sm text-signal-ink font-semibold">
+						{aviso}
+					</p>
+				)}
 				{errorCarga && (
 					<p role="alert" className="mt-4 text-ko text-sm">
 						{errorCarga}. Recarga la página para volver a intentarlo.
@@ -202,7 +256,7 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 			<section id="quiz" className="bg-bg p-8 text-center text-ink">
 				<h2 className="text-4xl font-display mb-2">Crear sala</h2>
 				<form
-					onSubmit={crearSala}
+					onSubmit={enviarCrear}
 					className="max-w-sm mx-auto flex flex-col gap-4"
 				>
 					<input
@@ -287,7 +341,7 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 					{error && <p role="alert" className="text-ko text-sm">{error}</p>}
 					<button
 						type="submit"
-						disabled={!nombre.trim() || preguntasFiltradas.length === 0}
+						disabled={!nombre.trim() || preguntasFiltradas.length === 0 || enviando}
 						className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-40"
 					>
 						Crear sala
@@ -313,7 +367,7 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 			<section id="quiz" className="bg-bg p-8 text-center text-ink">
 				<h2 className="text-4xl font-display mb-2">Unirse a sala</h2>
 				<form
-					onSubmit={unirseSala}
+					onSubmit={enviarUnirse}
 					className="max-w-sm mx-auto flex flex-col gap-4"
 				>
 					<input
@@ -338,7 +392,7 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 					{error && <p role="alert" className="text-ko text-sm">{error}</p>}
 					<button
 						type="submit"
-						disabled={!nombre.trim() || !codigo.trim()}
+						disabled={!nombre.trim() || !codigo.trim() || enviando}
 						className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-40"
 					>
 						Unirse
@@ -354,55 +408,6 @@ export default function Sala({ socket, onTestIniciado, onVolverInicio }) {
 						← Volver
 					</button>
 				</form>
-			</section>
-		);
-	}
-
-	// --- PANTALLA: Esperando jugadores ---
-	if (fase === "esperando") {
-		return (
-			<section id="quiz" className="bg-bg p-8 text-center text-ink">
-				<h2 className="text-4xl font-display mb-2">Sala: <span className="font-mono">{codigoSala}</span></h2>
-				<p className="text-ink-muted mb-2">
-					Comparte este código con los participantes
-				</p>
-				<p className="text-3xl sm:text-5xl font-mono font-bold text-primary tracking-widest mb-4">
-					{codigoSala}
-				</p>
-				<div className="max-w-sm mx-auto bg-card border border-line rounded-xl p-4 mb-4">
-					<p className="font-semibold mb-2">
-						Jugadores conectados (<span className="font-mono">{jugadores.length}</span>):
-					</p>
-					<ul className="text-left">
-						{jugadores.map((j, i) => (
-							<li key={i} className="py-1 border-b border-line last:border-0 flex items-center gap-2">
-								{i === 0 ? (
-									<Crown aria-hidden="true" size={20} strokeWidth={1.75} />
-								) : (
-									<UserRound aria-hidden="true" size={20} strokeWidth={1.75} />
-								)}
-								{j}
-							</li>
-						))}
-					</ul>
-				</div>
-				{error && <p role="alert" className="mb-4 text-ko text-sm">{error}</p>}
-				{esHost ? (
-					<button
-						onClick={iniciarTest}
-						disabled={jugadores.length < 2}
-						className="bg-primary hover:bg-primary-dark text-white px-6 py-3 rounded-lg font-semibold transition disabled:opacity-40 inline-flex items-center gap-2"
-					>
-						{jugadores.length < 2
-							? "Esperando más jugadores…"
-							: `Iniciar test (${jugadores.length} jugadores)`}
-						<Rocket aria-hidden="true" size={20} strokeWidth={1.75} />
-					</button>
-				) : (
-					<p className="text-ink-muted italic">
-						Esperando a que el anfitrión inicie el test…
-					</p>
-				)}
 			</section>
 		);
 	}

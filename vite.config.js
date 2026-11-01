@@ -7,10 +7,9 @@ export default defineConfig({
 		host: true,
 		port: 5173,
 		proxy: {
-			"/socket.io": {
-				target: "http://localhost:3001",
-				ws: true,
-			},
+			// En local el cliente usa el mismo origen y Vite reenvía la API al servidor de salas.
+			"/api": "http://localhost:8788",
+			"/health": "http://localhost:8788",
 		},
 	},
 });
