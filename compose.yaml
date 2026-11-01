@@ -1,0 +1,41 @@
+name: orpira-prl
+
+services:
+  prl-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: orpira/prl-api:${PRL_IMAGE_TAG:-1.0.0}
+    container_name: orpira-prl-api
+    init: true
+    restart: unless-stopped
+    environment:
+      NODE_ENV: production
+      HOST: 0.0.0.0
+      PORT: 8788
+      PRL_DATA_DIR: /app/data
+      PRL_ALLOWED_ORIGINS: ${PRL_ALLOWED_ORIGINS:?Define los orígenes HTTPS exactos en .env}
+      # Solo Nginx Proxy Manager alcanza el contenedor (sin puertos publicados), por eso
+      # se confía en X-Forwarded-For para los límites de peticiones por IP.
+      PRL_TRUST_PROXY: ${PRL_TRUST_PROXY:-true}
+    expose:
+      - "8788"
+    volumes:
+      - prl_data:/app/data
+    networks:
+      - orpira-network
+    healthcheck:
+      test: ["CMD", "node", "-e", "fetch('http://127.0.0.1:8788/health').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"]
+      interval: 20s
+      timeout: 3s
+      start_period: 10s
+      retries: 3
+
+volumes:
+  prl_data:
+    name: orpira_prl_data
+
+networks:
+  orpira-network:
+    external: true
+    name: orpira-network
