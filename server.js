@@ -1,16 +1,37 @@
 import { readFileSync } from "node:fs";
-import { crearServidorSalas } from "./src/server/salas.js";
+import { resolve } from "node:path";
+import { crearServicio } from "./src/server/servicio.js";
 
 const preguntas = JSON.parse(
 	readFileSync(new URL("./public/preguntas-prl.json", import.meta.url), "utf-8"),
 );
-const allowedOrigins = (process.env.ALLOWED_ORIGINS || "http://localhost:5173")
+const PORT = Number(process.env.PORT) || 8788;
+const HOST = process.env.HOST || "0.0.0.0";
+const directorioDatos = resolve(process.env.PRL_DATA_DIR || "./.data");
+const allowedOrigins = (process.env.PRL_ALLOWED_ORIGINS || "http://localhost:5173")
 	.split(",")
-	.map((origin) => origin.trim())
+	.map((origen) => origen.trim())
 	.filter(Boolean);
-const { httpServer } = crearServidorSalas({ preguntas, allowedOrigins });
-const PORT = process.env.PORT || 3001;
+const trustProxy = process.env.PRL_TRUST_PROXY === "true";
 
-httpServer.listen(PORT, "0.0.0.0", () => {
-	console.log(`Servidor PRL en http://0.0.0.0:${PORT}`);
+const servicio = await crearServicio({ preguntas, directorioDatos, allowedOrigins, trustProxy });
+
+servicio.httpServer.listen(PORT, HOST, () => {
+	console.log(`API de salas PRL en http://${HOST}:${PORT} (datos en ${directorioDatos})`);
 });
+
+let cerrando = false;
+async function cerrar(senal) {
+	if (cerrando) return;
+	cerrando = true;
+	console.log(`Recibido ${senal}: guardando salas y cerrando`);
+	try {
+		await servicio.cerrar();
+	} catch (error) {
+		console.error("Error al cerrar:", error);
+		process.exitCode = 1;
+	}
+	process.exit();
+}
+process.on("SIGTERM", () => cerrar("SIGTERM"));
+process.on("SIGINT", () => cerrar("SIGINT"));

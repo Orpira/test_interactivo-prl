@@ -1,0 +1,13 @@
+node_modules
+dist
+.data
+.git
+.github
+.vscode
+.env
+.env.*
+!.env.example
+# Las pruebas no forman parte de la imagen.
+**/*.test.js
+**/*.test.jsx
+*.md
