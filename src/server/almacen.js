@@ -30,6 +30,18 @@ export class AlmacenJson {
 		return JSON.parse(texto);
 	}
 
+	// Aparta un archivo ilegible (conservándolo para revisarlo) y devuelve la nueva ruta.
+	async apartarCorrupto(ahora = Date.now()) {
+		const destino = `${this.#ruta}.corrupto-${ahora}`;
+		try {
+			await rename(this.#ruta, destino);
+		} catch (error) {
+			if (error.code === "ENOENT") return null;
+			throw error;
+		}
+		return destino;
+	}
+
 	// Serializa en el momento de la llamada (los cambios posteriores no se mezclan) y agrupa:
 	// como mucho una escritura cada retardoMs, con el último estado. Se resuelve al escribirse.
 	guardar(datos) {

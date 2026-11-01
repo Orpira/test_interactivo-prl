@@ -95,6 +95,17 @@ describe("AlmacenJson", () => {
 		await expect(almacen.cargar()).rejects.toThrow(SyntaxError);
 	});
 
+	it("apartarCorrupto conserva el archivo ilegible con otro nombre y deja la ruta libre", async () => {
+		const almacen = new AlmacenJson(ruta, { retardoMs: 10 });
+		expect(await almacen.apartarCorrupto(1)).toBeNull();
+		await almacen.guardar({ ok: true });
+		await writeFile(ruta, "{roto", "utf8");
+		const destino = await almacen.apartarCorrupto(123);
+		expect(destino).toBe(`${ruta}.corrupto-123`);
+		expect(await readFile(destino, "utf8")).toBe("{roto");
+		expect(await almacen.cargar()).toBeNull();
+	});
+
 	it("un fallo de escritura rechaza la promesa y no bloquea los guardados siguientes", async () => {
 		await writeFile(join(directorio, "es-un-archivo"), "x");
 		const almacen = new AlmacenJson(join(directorio, "es-un-archivo", "salas.json"), { retardoMs: 10 });
