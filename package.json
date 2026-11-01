@@ -9,7 +9,8 @@
 		"start": "node server.js",
 		"dev:full": "node server.js & vite",
 		"test": "vitest run",
-		"test:watch": "vitest"
+		"test:watch": "vitest",
+		"prueba:aula": "node scripts/prueba-aula.mjs"
 	},
 	"keywords": [],
 	"author": "",

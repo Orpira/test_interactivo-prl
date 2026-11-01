@@ -217,8 +217,23 @@ npm run preview
 | `npm run test:watch` | Ejecuta Vitest en modo observación |
 | `npm run server` | API de salas local (puerto 8788) |
 | `npm start` | Arranque de producción de la API de salas |
+| `npm run prueba:aula` | Simula una clase de 30 alumnos contra la API (ver más abajo) |
 
 Las pruebas validan el barajado, la unicidad e integridad del banco, los grupos de categorías, el núcleo de salas con reloj controlado, el almacén en disco, la API HTTP real (límites, CORS, 401/409/413/429 y reinicios) y la coherencia del despliegue Docker. Las pruebas de interfaz usan jsdom y cubren los turnos locales, el modo en red, los reintentos con el mismo identificador, el reloj del servidor y la recuperación tras recargar.
+
+## Prueba de aula
+
+`scripts/prueba-aula.mjs` (Node 22, sin dependencias) simula una clase entera: un profesor crea una sala de 10 preguntas con 30 s por pregunta, se unen 30 alumnos desde la misma máquina, cada uno consulta cada segundo y responde con un retraso de 2 a 10 s acertando entre un 40 % y un 90 %, y tres alumnos sufren un corte de 20 s y vuelven con su sesión. Al terminar comprueba que hay 30 alumnos en el ranking, que nadie recibió `429`, que la suma de aciertos coincide con lo enviado y que un reenvío devuelve lo mismo.
+
+```bash
+# En local (con "npm run server" en marcha)
+npm run prueba:aula
+
+# Contra producción
+API_URL=https://api-prl.orpira.es npm run prueba:aula
+```
+
+Variables opcionales: `ALUMNOS`, `PREGUNTAS`, `SEGUNDOS`, `ESCALA_TIEMPO` (0.3 = tres veces más rápido; no bajes de 0.3 o superarás el límite por sesión), `CORTE_MS`, `SEMILLA` (repite una ejecución) y `ORIGEN`. Termina con código 0 si todo es correcto, 1 si falla alguna comprobación y 2 si se interrumpe.
 
 ## API de salas
 

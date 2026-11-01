@@ -109,6 +109,16 @@ En el proyecto de `prl.orpira.es` añade la variable `VITE_API_URL=https://api-p
 (sin barra final) y vuelve a desplegar. Hasta entonces el botón «En Red» muestra
 «No disponible ahora».
 
+### 6. Prueba de aula
+
+Con el despliegue terminado, simula una clase de 30 alumnos desde tu equipo:
+
+```bash
+API_URL=https://api-prl.orpira.es ORIGEN=https://prl.orpira.es npm run prueba:aula
+```
+
+Debe terminar con `RESULTADO: CORRECTO`: 30 alumnos en el ranking, ninguna respuesta `429` y los aciertos del ranking iguales a los enviados. Si salen `429`, revisa `PRL_TRUST_PROXY`. Después, prueba con 4 o 5 móviles reales en la misma wifi: bloquea uno 30 s, recarga otro a mitad del test y pon un tercero en modo avión unos segundos; los tres deben volver a su pregunta con su progreso.
+
 ## Copias de seguridad
 
 Antes de cada actualización guarda el volumen:
