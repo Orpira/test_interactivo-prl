@@ -189,10 +189,12 @@ describe("flujo local", () => {
 		expect(tests[1]).toEqual(tests[0]);
 		expect(tests[2]).toEqual(tests[0]);
 		await pulsar("Ver Ranking");
-		expect(contenedor.querySelectorAll("tbody tr")).toHaveLength(3);
+		expect(
+			[...contenedor.querySelectorAll("tbody tr")].filter((fila) => !fila.closest("#normativa")),
+		).toHaveLength(3);
 		await pulsar("Nueva sesión");
 		expect(contenedor.textContent).toContain("Elige cómo jugar");
-		expect(contenedor.querySelector("table")).toBeNull();
+		expect(contenedor.querySelector("table:not(#normativa table)")).toBeNull();
 	});
 
 	it("reinicia pregunta, aciertos y tiempo tras agotar la última pregunta", async () => {

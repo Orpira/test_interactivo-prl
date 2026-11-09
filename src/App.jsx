@@ -4,6 +4,7 @@ import QuizPRL from "./components/PreviewEditor";
 import RankingSummary from "./components/RankingSummary";
 import Footer from "./components/Footer";
 import ModoRed from "./components/ModoRed";
+import Normativa from "./components/Normativa";
 import useDisponibilidadRed from "./hooks/useDisponibilidadRed";
 import { leerSesion } from "./api/sesion";
 
@@ -65,6 +66,8 @@ export default function App() {
 					)}
 				</>
 			)}
+
+			<Normativa />
 
 			<Footer />
 		</div>

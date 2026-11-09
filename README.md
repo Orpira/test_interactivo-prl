@@ -12,6 +12,7 @@ Aplicación interactiva para practicar y evaluar conocimientos de Prevención de
 - **El servidor es la autoridad:** corrige, controla el tiempo y calcula el ranking. Las respuestas correctas no se envían antes de responder y un reenvío por un corte de red no cuenta dos veces.
 - **Salas guardadas en disco:** sobreviven a reinicios y despliegues.
 - **Temporizador opcional:** 15/30/45/60 segundos por pregunta o 5/10/15/20 minutos por test.
+- **Normativa por país:** sección de documentación con selector España / Colombia. Para Colombia recoge el SG-SST (Decreto 1072 de 2015, Resolución 0312 de 2019) y las novedades 2025-2026 (Resoluciones 1843 y 3461 de 2025, Decreto 728 de 2025, Decreto 1040 de 2026…), con buscador, filtro de novedades, normas derogadas y tabla de equivalencias. Los datos están en `src/data/normativa.js`.
 - **Interfaz adaptable:** optimizada para móvil y escritorio, con soporte para `prefers-reduced-motion`.
 
 ## Stack tecnológico

@@ -10,7 +10,7 @@ export default function Features() {
 		{
 			icon: BookOpenCheck,
 			title: "Contenido práctico",
-			desc: "Basado en la Ley 31/1995 y normativa vigente española",
+			desc: "Ley 31/1995 española y documentación del SG-SST colombiano actualizada",
 		},
 		{
 			icon: Trophy,
