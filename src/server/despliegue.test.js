@@ -52,12 +52,14 @@ describe("imagen Docker", () => {
 		}
 	});
 
-	it("copia el banco de preguntas y package.json (por «type»: «module»)", () => {
+	it("copia los bancos de preguntas y package.json (por «type»: «module»)", () => {
 		const origenes = origenesCopiados();
-		expect(cubierto("public/preguntas-prl.json", origenes)).toBe(true);
+		for (const banco of ["public/preguntas-prl.json", "public/preguntas-sst-colombia.json"]) {
+			expect(cubierto(banco, origenes), `${banco} no se copia en el Dockerfile`).toBe(true);
+			expect(leer("server.js")).toContain(banco);
+		}
 		expect(cubierto("package.json", origenes)).toBe(true);
 		expect(JSON.parse(leer("package.json")).type).toBe("module");
-		expect(leer("server.js")).toContain("public/preguntas-prl.json");
 	});
 
 	it("el servidor no necesita node_modules: solo usa módulos integrados de Node", () => {

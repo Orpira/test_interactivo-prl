@@ -1,8 +1,23 @@
 // @vitest-environment jsdom
-import React, { act } from "react";
+import React, { act, useState } from "react";
 import { createRoot } from "react-dom/client";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import Normativa from "./Normativa.jsx";
+import { guardarReglamentacion, leerReglamentacion } from "../utils/reglamentacion.js";
+
+// La app comparte el país entre secciones; aquí se imita con el mismo almacenamiento.
+function ConPais() {
+	const [pais, setPais] = useState(leerReglamentacion);
+	return (
+		<Normativa
+			pais={pais}
+			onCambiarPais={(nuevo) => {
+				setPais(nuevo);
+				guardarReglamentacion(nuevo);
+			}}
+		/>
+	);
+}
 
 let contenedor;
 let root;
@@ -21,7 +36,7 @@ afterEach(async () => {
 	vi.unstubAllGlobals();
 });
 
-const pintar = () => act(async () => root.render(<Normativa />));
+const pintar = () => act(async () => root.render(<ConPais />));
 const pestana = (pais) =>
 	[...contenedor.querySelectorAll('[role="tab"]')].find((b) => b.textContent.includes(pais));
 const titulos = () => [...contenedor.querySelectorAll("article h4")].map((h) => h.textContent);

@@ -147,6 +147,7 @@ describe("entrar en una sala", () => {
 		expect(crearSala).toHaveBeenCalledWith({
 			nombre: "Ana",
 			numPreguntas: 10,
+			banco: "es",
 			categorias: [],
 			timerConfig: { activo: false, tipo: null, segundos: null },
 		});

@@ -2,6 +2,9 @@ import React, { useState, useEffect, useMemo } from "react";
 import { Crown, Globe, Rocket, UserRound, UsersRound } from "lucide-react";
 import { crearSala as apiCrearSala, unirseSala as apiUnirseSala } from "../api/salas.js";
 import CategorySelector from "./CategorySelector";
+import useBancoPreguntas from "../hooks/useBancoPreguntas.js";
+import { reglamentacion } from "../utils/reglamentacion.js";
+import SelectorReglamentacion from "./SelectorReglamentacion.jsx";
 
 // Sin `vista` muestra elegir, crear y unirse; con la vista de una sala en espera, la sala de espera.
 export default function Sala({
@@ -12,6 +15,8 @@ export default function Sala({
 	onIniciar,
 	onSalir,
 	onVolverInicio,
+	pais = "es",
+	onCambiarPais,
 }) {
 	const [fase, setFase] = useState("elegir"); // "elegir" | "crear" | "unirse"
 	const [nombre, setNombre] = useState("");
@@ -19,32 +24,11 @@ export default function Sala({
 	const [numPreguntas, setNumPreguntas] = useState(10);
 	const [error, setError] = useState("");
 	const [enviando, setEnviando] = useState(false);
-	const [todasPreguntas, setTodasPreguntas] = useState([]);
-	const [errorCarga, setErrorCarga] = useState("");
+	const { preguntas: todasPreguntas, error: errorCarga } = useBancoPreguntas(pais);
 	const [categoriasSeleccionadas, setCategoriasSeleccionadas] = useState([]);
 	const [timerTipo, setTimerTipo] = useState("ninguno");
 	const [timerSegundos, setTimerSegundos] = useState(30);
 
-	// Cargar preguntas para extraer categorías
-	useEffect(() => {
-		const controlador = new AbortController();
-		fetch("/preguntas-prl.json", { signal: controlador.signal })
-			.then((res) => {
-				if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
-				return res.json();
-			})
-			.then((data) => {
-				if (!Array.isArray(data) || data.length === 0) {
-					throw new Error("El banco de preguntas está vacío o no es válido");
-				}
-				setTodasPreguntas(data);
-			})
-			.catch((error) => {
-				if (controlador.signal.aborted) return;
-				setErrorCarga(`No se pudieron cargar las preguntas: ${error.message}`);
-			});
-		return () => controlador.abort();
-	}, []);
 
 	const preguntasFiltradas = useMemo(
 		() =>
@@ -86,6 +70,7 @@ export default function Sala({
 			const sala = await apiCrearSala({
 				nombre: nombre.trim(),
 				numPreguntas,
+				banco: pais,
 				categorias: categoriasSeleccionadas,
 				timerConfig:
 					timerTipo !== "ninguno"
@@ -136,6 +121,9 @@ export default function Sala({
 				</h2>
 				<p className="text-ink-muted mb-2">
 					Comparte este código con los participantes
+				</p>
+				<p className="mb-2 text-sm font-semibold text-ink-soft">
+					Reglamentación: {reglamentacion(vista.banco).pais} ({reglamentacion(vista.banco).siglas})
 				</p>
 				<p className="text-3xl sm:text-5xl font-mono font-bold text-primary tracking-widest mb-4">
 					{vista.codigo}
@@ -255,6 +243,16 @@ export default function Sala({
 		return (
 			<section id="quiz" className="bg-bg p-8 text-center text-ink">
 				<h2 className="text-4xl font-display mb-2">Crear sala</h2>
+				{onCambiarPais && (
+					<SelectorReglamentacion
+						pais={pais}
+						onChange={(nuevo) => {
+							setCategoriasSeleccionadas([]);
+							onCambiarPais(nuevo);
+						}}
+						className="mb-6"
+					/>
+				)}
 				<form
 					onSubmit={enviarCrear}
 					className="max-w-sm mx-auto flex flex-col gap-4"
@@ -288,6 +286,7 @@ export default function Sala({
 						Categorías (opcional):
 					</p>
 					<CategorySelector
+						grupos={reglamentacion(pais).grupos}
 						preguntas={todasPreguntas}
 						seleccionadas={categoriasSeleccionadas}
 						onChange={setCategoriasSeleccionadas}

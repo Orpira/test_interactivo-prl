@@ -9,25 +9,7 @@ import {
 } from "../data/normativa.js";
 import { normalizar } from "../utils/categorias.js";
 
-const CLAVE_PAIS = "prl-normativa-pais";
-const PAISES = ["es", "co"];
-
-function leerPais() {
-	try {
-		const guardado = window.localStorage.getItem(CLAVE_PAIS);
-		return PAISES.includes(guardado) ? guardado : "es";
-	} catch {
-		return "es";
-	}
-}
-
-function guardarPais(pais) {
-	try {
-		window.localStorage.setItem(CLAVE_PAIS, pais);
-	} catch {
-		// Sin almacenamiento disponible se mantiene la elección solo en esta visita.
-	}
-}
+import { PAISES } from "../utils/reglamentacion.js";
 
 const ESTILO_ESTADO = {
 	vigente: "bg-surface text-ink-soft",
@@ -71,8 +53,8 @@ function FichaNorma({ norma }) {
 	);
 }
 
-export default function Normativa() {
-	const [pais, setPais] = useState(leerPais);
+// El país lo comparte toda la app: elegirlo aquí cambia también el banco de preguntas.
+export default function Normativa({ pais, onCambiarPais }) {
 	const [texto, setTexto] = useState("");
 	const [soloNovedades, setSoloNovedades] = useState(false);
 	const idBusqueda = useId();
@@ -85,10 +67,7 @@ export default function Normativa() {
 	);
 	const totalVisibles = temas.reduce((suma, { normas }) => suma + normas.length, 0);
 
-	function elegirPais(nuevo) {
-		setPais(nuevo);
-		guardarPais(nuevo);
-	}
+	const elegirPais = onCambiarPais;
 
 	function alPulsarTeclaPestana(evento) {
 		if (evento.key !== "ArrowRight" && evento.key !== "ArrowLeft") return;

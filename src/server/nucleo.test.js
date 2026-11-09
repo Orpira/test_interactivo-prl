@@ -485,3 +485,46 @@ describe("aJSON y desdeJSON", () => {
 		expect(gestor.sucio).toBe(true);
 	});
 });
+
+describe("bancos por reglamentación", () => {
+	const preguntasCo = Array.from({ length: 4 }, (_, i) => ({
+		id: 1001 + i,
+		categoria: "COPASST y Vigía",
+		pregunta: `Pregunta Colombia ${i + 1}`,
+		opciones: ["A", "B", "C", "D"],
+		respuesta: 0,
+	}));
+	const base = { nombre: "Ana", numPreguntas: 3, categorias: [], timerConfig: { activo: false } };
+
+	beforeEach(() => {
+		gestor = new GestorSalas({ bancos: { es: preguntas, co: preguntasCo }, ahora });
+	});
+
+	it("sin banco usa el de España, como antes", () => {
+		const { codigo, sessionId } = gestor.crear(base);
+		expect(gestor.vista(codigo, sessionId).banco).toBe("es");
+		expect(gestor.salas.get(codigo).preguntas.every(({ id }) => id <= 12)).toBe(true);
+	});
+
+	it("con banco «co» solo toma preguntas de Colombia", () => {
+		const { codigo, sessionId } = gestor.crear({ ...base, banco: "co", numPreguntas: 4 });
+		expect(gestor.vista(codigo, sessionId).banco).toBe("co");
+		expect(gestor.salas.get(codigo).preguntas.map(({ id }) => id).sort()).toEqual([1001, 1002, 1003, 1004]);
+	});
+
+	it("valida el banco y las categorías contra el banco elegido", () => {
+		esperarError("BANCO_INVALIDO", () => gestor.crear({ ...base, banco: "mx" }));
+		esperarError("BANCO_INVALIDO", () => gestor.crear({ ...base, banco: "toString" }));
+		esperarError("BANCO_INVALIDO", () => gestor.crear({ ...base, banco: 7 }));
+		esperarError("CATEGORIAS_INVALIDAS", () => gestor.crear({ ...base, banco: "co", categorias: ["Base"] }));
+		esperarError("CANTIDAD_INVALIDA", () => gestor.crear({ ...base, banco: "co", numPreguntas: 5 }));
+	});
+
+	it("una sala guardada antes de existir los bancos se muestra como de España", () => {
+		const { codigo, sessionId } = gestor.crear(base);
+		const guardado = gestor.aJSON();
+		delete guardado.salas[0].banco;
+		const restaurado = GestorSalas.desdeJSON(guardado, { bancos: { es: preguntas, co: preguntasCo }, ahora });
+		expect(restaurado.vista(codigo, sessionId).banco).toBe("es");
+	});
+});

@@ -11,6 +11,7 @@ COPY --chown=node:node package.json server.js ./
 COPY --chown=node:node src/server ./src/server
 COPY --chown=node:node src/utils/quiz.js ./src/utils/quiz.js
 COPY --chown=node:node public/preguntas-prl.json ./public/preguntas-prl.json
+COPY --chown=node:node public/preguntas-sst-colombia.json ./public/preguntas-sst-colombia.json
 USER node
 EXPOSE 8788
 VOLUME ["/app/data"]

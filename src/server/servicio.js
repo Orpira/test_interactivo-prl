@@ -9,6 +9,7 @@ const INTERVALO_LIMPIEZA_MS = 10 * 60 * 1000;
 // Une el gestor, el almacén en disco y el servidor HTTP. No llama a listen().
 export async function crearServicio({
 	preguntas,
+	bancos = { es: preguntas },
 	directorioDatos,
 	allowedOrigins = ["http://localhost:5173"],
 	trustProxy = false,
@@ -24,13 +25,13 @@ export async function crearServicio({
 	try {
 		const guardado = await almacen.cargar();
 		gestor = guardado
-			? GestorSalas.desdeJSON(guardado, { preguntas, ahora })
-			: new GestorSalas({ preguntas, ahora });
+			? GestorSalas.desdeJSON(guardado, { bancos, ahora })
+			: new GestorSalas({ bancos, ahora });
 	} catch (error) {
 		// Un archivo ilegible no se sobrescribe en silencio: se aparta para poder revisarlo.
 		avisar("No se pudieron restaurar las salas; se empieza vacío:", error.message);
 		await almacen.apartarCorrupto?.();
-		gestor = new GestorSalas({ preguntas, ahora });
+		gestor = new GestorSalas({ bancos, ahora });
 	}
 
 	const httpServer = crearServidorHttp({ gestor, almacen, allowedOrigins, trustProxy, limites, ahora });

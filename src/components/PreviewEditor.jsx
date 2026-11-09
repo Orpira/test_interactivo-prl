@@ -8,6 +8,9 @@ import {
 	UsersRound,
 } from "lucide-react";
 import { prepararTest } from "../utils/quiz.js";
+import useBancoPreguntas from "../hooks/useBancoPreguntas.js";
+import { reglamentacion } from "../utils/reglamentacion.js";
+import SelectorReglamentacion from "./SelectorReglamentacion.jsx";
 
 function formatearTiempo(segundos) {
 	if (segundos === null || segundos === undefined) return "";
@@ -17,6 +20,8 @@ function formatearTiempo(segundos) {
 }
 
 export default function QuizPRL({
+	pais = "es",
+	onCambiarPais,
 	onResultado,
 	resultados,
 	setMostrarRanking,
@@ -24,9 +29,8 @@ export default function QuizPRL({
 	redDisponible,
 	conexionComprobada,
 }) {
-	const [todasPreguntas, setTodasPreguntas] = useState([]);
-	const [cargando, setCargando] = useState(true);
-	const [errorCarga, setErrorCarga] = useState("");
+	const { preguntas: todasPreguntas, cargando, error: errorCarga } = useBancoPreguntas(pais);
+	const { siglas, grupos } = reglamentacion(pais);
 
 	// Fase de configuración
 	const [modo, setModo] = useState(null); // "individual" | "multijugador"
@@ -93,27 +97,6 @@ export default function QuizPRL({
 				)
 			: todasPreguntas;
 
-	useEffect(() => {
-		const controlador = new AbortController();
-		fetch("/preguntas-prl.json", { signal: controlador.signal })
-			.then((res) => {
-				if (!res.ok) throw new Error(`Error HTTP ${res.status}`);
-				return res.json();
-			})
-			.then((data) => {
-				if (!Array.isArray(data) || data.length === 0) {
-					throw new Error("El banco de preguntas está vacío o no es válido");
-				}
-				setTodasPreguntas(data);
-				setCargando(false);
-			})
-			.catch((error) => {
-				if (controlador.signal.aborted) return;
-				setErrorCarga(`No se pudieron cargar las preguntas: ${error.message}`);
-				setCargando(false);
-			});
-		return () => controlador.abort();
-	}, []);
 
 	const opcionesCantidad = [5, 10, 15, 20].filter(
 		(n) => n <= preguntasFiltradas.length,
@@ -318,25 +301,6 @@ export default function QuizPRL({
 
 	// --- RENDERS ---
 
-	if (cargando) {
-		return (
-			<section id="quiz" className="bg-bg p-6 text-center text-ink">
-				<p className="text-lg">Cargando preguntas…</p>
-			</section>
-		);
-	}
-
-	if (todasPreguntas.length === 0) {
-		return (
-			<section id="quiz" className="bg-bg p-6 text-center text-ink">
-				<p role="alert" className="text-lg text-ko">
-					{errorCarga || "No hay preguntas disponibles."} Recarga la página para
-					volver a intentarlo.
-				</p>
-			</section>
-		);
-	}
-
 	// Fase: Elegir modo
 	if (fase === "modo") {
 		return (
@@ -345,18 +309,23 @@ export default function QuizPRL({
 					PRL Master
 				</p>
 				<h2 className="text-4xl font-display mb-2">Elige cómo jugar</h2>
-				<p className="text-ink-muted mb-8">Selecciona la modalidad</p>
+				<p className="text-ink-muted mb-6">Selecciona la reglamentación y la modalidad</p>
+				{onCambiarPais && (
+					<SelectorReglamentacion pais={pais} onChange={onCambiarPais} className="mb-8" />
+				)}
 				<div className="flex flex-wrap justify-center gap-4">
 					<button
 						onClick={() => seleccionarModo("individual")}
-						className="min-w-40 border border-line bg-card text-ink px-6 py-5 rounded-xl font-semibold hover:bg-surface hover:border-primary transition text-lg flex flex-col items-center gap-2"
+						disabled={todasPreguntas.length === 0}
+						className="min-w-40 border border-line bg-card text-ink px-6 py-5 rounded-xl font-semibold hover:bg-surface hover:border-primary transition text-lg flex flex-col items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						<UserRound aria-hidden="true" size={20} strokeWidth={1.75} />
 						Individual
 					</button>
 					<button
 						onClick={() => seleccionarModo("multijugador")}
-						className="min-w-40 border border-line bg-card text-ink px-6 py-5 rounded-xl font-semibold hover:bg-surface hover:border-primary transition text-lg flex flex-col items-center gap-2"
+						disabled={todasPreguntas.length === 0}
+						className="min-w-40 border border-line bg-card text-ink px-6 py-5 rounded-xl font-semibold hover:bg-surface hover:border-primary transition text-lg flex flex-col items-center gap-2 disabled:cursor-not-allowed disabled:opacity-50"
 					>
 						<UsersRound aria-hidden="true" size={20} strokeWidth={1.75} />
 						Multijugador
@@ -375,6 +344,36 @@ export default function QuizPRL({
 						)}
 					</button>
 				</div>
+				{cargando && (
+					<p role="status" className="mt-6 text-sm text-ink-muted">
+						Cargando preguntas…
+					</p>
+				)}
+				{errorCarga && (
+					<p role="alert" className="mt-6 text-ko">
+						{errorCarga}. Recarga la página para volver a intentarlo.
+					</p>
+				)}
+			</section>
+		);
+	}
+
+
+	if (cargando) {
+		return (
+			<section id="quiz" className="bg-bg p-6 text-center text-ink">
+				<p className="text-lg">Cargando preguntas…</p>
+			</section>
+		);
+	}
+
+	if (todasPreguntas.length === 0) {
+		return (
+			<section id="quiz" className="bg-bg p-6 text-center text-ink">
+				<p role="alert" className="text-lg text-ko">
+					{errorCarga || "No hay preguntas disponibles."} Recarga la página para
+					volver a intentarlo.
+				</p>
 			</section>
 		);
 	}
@@ -429,7 +428,7 @@ export default function QuizPRL({
 				<h2 className="text-4xl font-display mb-2">
 					{modo === "multijugador"
 						? `Jugador ${jugadorActualIdx + 1} de ${totalJugadores}`
-						: "Test de PRL"}
+						: `Test de ${siglas}`}
 				</h2>
 				<p className="text-ink-muted mb-6">Introduce tu nombre para comenzar</p>
 				{modo === "multijugador" && jugadorActualIdx > 0 && (
@@ -493,6 +492,7 @@ export default function QuizPRL({
 				</div>
 
 				<CategorySelector
+					grupos={grupos}
 					preguntas={todasPreguntas}
 					seleccionadas={categoriasSeleccionadas}
 					onChange={setCategoriasSeleccionadas}
@@ -639,7 +639,7 @@ export default function QuizPRL({
 		const preguntaActual = preguntas[indice];
 		return (
 			<section id="quiz" className="bg-bg px-4 py-10 md:p-12 text-ink">
-				<h2 className="text-4xl font-display mb-1 text-center">Test de PRL</h2>
+				<h2 className="text-4xl font-display mb-1 text-center">Test de {siglas}</h2>
 				<p className="text-center text-sm text-ink-muted mb-1">
 					{nombreUsuario.trim()}
 					{modo === "multijugador" &&

@@ -267,3 +267,59 @@ it("Sala avisa del fallo de carga e impide crear sin preguntas", async () => {
 	expect([...contenedor.querySelectorAll("button")]
 		.find((boton) => boton.textContent.trim() === "Crear sala").disabled).toBe(true);
 });
+
+describe("reglamentación", () => {
+	const preguntasCo = Array.from({ length: 6 }, (_, indice) => ({
+		id: 1001 + indice,
+		categoria: "Trabajo en Alturas",
+		pregunta: `Pregunta de Colombia ${indice + 1}`,
+		opciones: ["Correcta", "Incorrecta"],
+		respuesta: 0,
+	}));
+
+	beforeEach(() => {
+		window.localStorage.clear();
+		fetch.mockImplementation(async (ruta) => ({
+			ok: true,
+			json: async () => (ruta === "/preguntas-sst-colombia.json" ? preguntasCo : preguntas),
+		}));
+	});
+
+	const radio = (pais) => contenedor.querySelector(`input[name="reglamentacion"][value="${pais}"]`);
+
+	it("empieza con España y al elegir Colombia carga su banco y sus categorías", async () => {
+		await act(async () => root.render(<App />));
+		expect(radio("es").checked).toBe(true);
+		expect(fetch).toHaveBeenCalledWith("/preguntas-prl.json", expect.anything());
+
+		await act(async () => radio("co").click());
+		expect(fetch).toHaveBeenCalledWith("/preguntas-sst-colombia.json", expect.anything());
+		expect(window.localStorage.getItem("prl-reglamentacion")).toBe("co");
+
+		await pulsar("Individual");
+		expect(contenedor.textContent).toContain("Test de SST");
+		await escribir("input[type=text]", "Ana");
+		await pulsar("Continuar");
+		const selector = contenedor.querySelector("#quiz").textContent;
+		expect(selector).toContain("Peligros y Tareas Críticas");
+		expect(selector).toContain("6 preguntas");
+		// El banco de España de la prueba solo tiene la categoría «Base», que caería en «Otras».
+		expect(selector).not.toContain("Otras");
+	});
+
+	it("la pestaña de Normativa y el test comparten el país", async () => {
+		await act(async () => root.render(<App />));
+		const pestanaColombia = [...contenedor.querySelectorAll('[role="tab"]')].find((b) =>
+			b.textContent.includes("Colombia"),
+		);
+		await act(async () => pestanaColombia.click());
+		expect(radio("co").checked).toBe(true);
+	});
+
+	it("recuerda la reglamentación elegida en la siguiente visita", async () => {
+		window.localStorage.setItem("prl-reglamentacion", "co");
+		await act(async () => root.render(<App />));
+		expect(radio("co").checked).toBe(true);
+		expect(fetch).toHaveBeenCalledWith("/preguntas-sst-colombia.json", expect.anything());
+	});
+});
