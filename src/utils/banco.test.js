@@ -1,11 +1,14 @@
 import { readFileSync } from "node:fs";
 import { describe, expect, it } from "vitest";
 
-const preguntas = JSON.parse(
-	readFileSync(new URL("../../public/preguntas-prl.json", import.meta.url)),
-);
+import { REGLAMENTACIONES } from "./reglamentacion.js";
 
-describe("banco de preguntas", () => {
+const leerBanco = (ruta) =>
+	JSON.parse(readFileSync(new URL(`../../public${ruta}`, import.meta.url)));
+
+describe.each(Object.values(REGLAMENTACIONES).map((r) => [r.pais, r]))("banco de preguntas de %s", (_, { banco, grupos }) => {
+	const preguntas = leerBanco(banco);
+
 	it("tiene ids únicos", () => {
 		const ids = preguntas.map(({ id }) => id);
 		expect(new Set(ids).size).toBe(ids.length);
@@ -39,5 +42,24 @@ describe("banco de preguntas", () => {
 		for (const pregunta of preguntas) {
 			expect(pregunta.categoria.trim()).not.toBe("");
 		}
+	});
+
+	it("tiene todas sus categorías en algún grupo temático", () => {
+		const agrupadas = new Set(grupos.flatMap(({ categorias }) => categorias));
+		const sinGrupo = [...new Set(preguntas.map(({ categoria }) => categoria))].filter(
+			(categoria) => !agrupadas.has(categoria),
+		);
+		expect(sinGrupo).toEqual([]);
+	});
+});
+
+describe("bancos por reglamentación", () => {
+	it("no comparten ids ni categorías, para que no se mezclen en una sala", () => {
+		const es = leerBanco(REGLAMENTACIONES.es.banco);
+		const co = leerBanco(REGLAMENTACIONES.co.banco);
+		const idsEs = new Set(es.map(({ id }) => id));
+		const categoriasEs = new Set(es.map(({ categoria }) => categoria));
+		expect(co.filter(({ id }) => idsEs.has(id))).toEqual([]);
+		expect(co.filter(({ categoria }) => categoriasEs.has(categoria))).toEqual([]);
 	});
 });

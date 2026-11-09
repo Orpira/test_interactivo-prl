@@ -131,6 +131,7 @@ export default function CategorySelector({
 	seleccionadas,
 	onChange,
 	compacto = false,
+	grupos: gruposBase,
 }) {
 	const [busqueda, setBusqueda] = useState("");
 	const [grupoAbierto, setGrupoAbierto] = useState(null);
@@ -149,7 +150,7 @@ export default function CategorySelector({
 	const idPanel = useId();
 
 	const recuentos = useMemo(() => contarPorCategoria(preguntas), [preguntas]);
-	const grupos = useMemo(() => construirGrupos(preguntas), [preguntas]);
+	const grupos = useMemo(() => construirGrupos(preguntas, gruposBase), [preguntas, gruposBase]);
 	const resultados = useMemo(() => buscar(grupos, busqueda), [grupos, busqueda]);
 	const buscando = busqueda.trim() !== "";
 	const total = totalPreguntas(seleccionadas, recuentos);

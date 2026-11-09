@@ -1,6 +1,6 @@
 import React from "react";
 import { Trophy } from "lucide-react";
-export default function RankingSummary({ resultados, onNuevo }) {
+export default function RankingSummary({ resultados, onNuevo, siglas = "PRL" }) {
 	const ranking = [...resultados].sort((a, b) => {
 		if (b.porcentaje !== a.porcentaje) return b.porcentaje - a.porcentaje;
 		return b.aciertos - a.aciertos;
@@ -10,7 +10,7 @@ export default function RankingSummary({ resultados, onNuevo }) {
 		<section id="ranking" className="p-6 md:p-12 bg-bg text-ink">
 			<h2 className="text-4xl font-display mb-4 text-center inline-flex items-center justify-center gap-3 w-full">
 				<Trophy aria-hidden="true" size={20} strokeWidth={1.75} />
-				Ranking PRL
+				Ranking {siglas}
 			</h2>
 			<p className="text-center text-ink-muted mb-4">
 				Resultados de la sesión — {resultados.length} participante

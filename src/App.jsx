@@ -4,13 +4,21 @@ import QuizPRL from "./components/PreviewEditor";
 import RankingSummary from "./components/RankingSummary";
 import Footer from "./components/Footer";
 import ModoRed from "./components/ModoRed";
+import Normativa from "./components/Normativa";
 import useDisponibilidadRed from "./hooks/useDisponibilidadRed";
 import { leerSesion } from "./api/sesion";
+import { guardarReglamentacion, leerReglamentacion, reglamentacion } from "./utils/reglamentacion";
 
 export default function App() {
 	const [resultados, setResultados] = useState([]);
 	const [mostrarRanking, setMostrarRanking] = useState(false);
 	const [sesion, setSesion] = useState(0);
+	const [pais, setPais] = useState(leerReglamentacion);
+
+	const cambiarPais = useCallback((nuevo) => {
+		setPais(nuevo);
+		guardarReglamentacion(nuevo);
+	}, []);
 
 	// Si quedó una sala guardada (recarga o móvil bloqueado), se vuelve directamente a ella.
 	const [recuperando, setRecuperando] = useState(() => leerSesion() !== null);
@@ -43,13 +51,22 @@ export default function App() {
 			<Hero />
 
 			{/* Modo En Red: sala, test y ranking según la vista que da el servidor */}
-			{modoRed && <ModoRed recuperando={recuperando} onVolverInicio={volverInicio} />}
+			{modoRed && (
+				<ModoRed
+					recuperando={recuperando}
+					onVolverInicio={volverInicio}
+					pais={pais}
+					onCambiarPais={cambiarPais}
+				/>
+			)}
 
 			{/* Modo local (individual / multijugador local) */}
 			{!modoRed && (
 				<>
 					<QuizPRL
 						key={sesion}
+						pais={pais}
+						onCambiarPais={cambiarPais}
 						onResultado={agregarResultado}
 						resultados={resultados}
 						setMostrarRanking={setMostrarRanking}
@@ -61,10 +78,13 @@ export default function App() {
 						<RankingSummary
 							resultados={resultados}
 							onNuevo={iniciarNuevoRanking}
+							siglas={reglamentacion(pais).siglas}
 						/>
 					)}
 				</>
 			)}
+
+			<Normativa pais={pais} onCambiarPais={cambiarPais} />
 
 			<Footer />
 		</div>

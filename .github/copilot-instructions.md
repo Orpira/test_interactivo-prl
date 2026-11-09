@@ -3,7 +3,7 @@
 - App de tests de Prevención de Riesgos Laborales (PRL) en español.
 - Frontend: React 19 + Vite 6 + Tailwind CSS 3 (JavaScript, sin TypeScript).
 - Servidor de salas en red: Express 5 + Socket.IO 4 en `server.js` (ES modules).
-- Banco de preguntas: `public/preguntas-prl.json`. Cada pregunta tiene
+- Bancos de preguntas: `public/preguntas-prl.json` (España) y `public/preguntas-sst-colombia.json` (Colombia, ids desde 1001). La reglamentación elegida se define en `src/utils/reglamentacion.js`. Cada pregunta tiene
   `{ id, categoria, pregunta, opciones: string[], respuesta: number }`,
   donde `respuesta` es el índice de la opción correcta.
 - Componentes principales en `src/components/`:

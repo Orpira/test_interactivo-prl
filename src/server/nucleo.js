@@ -15,6 +15,7 @@ const FORMATO_CODIGO = /^PRL-[A-Z0-9]{4}$/;
 const MENSAJES = {
 	DATOS_INVALIDOS: "Datos no válidos",
 	NOMBRE_INVALIDO: "El nombre debe tener entre 1 y 30 caracteres",
+	BANCO_INVALIDO: "Reglamentación no válida",
 	CATEGORIAS_INVALIDAS: "Categorías no válidas",
 	CANTIDAD_INVALIDA: "Cantidad de preguntas no válida",
 	TEMPORIZADOR_INVALIDO: "Temporizador no válido",
@@ -110,11 +111,13 @@ const porcentaje = (aciertos, total) =>
 export class GestorSalas {
 	constructor({
 		preguntas = [],
+		// Un banco por reglamentación ({ es: [...], co: [...] }); `preguntas` equivale a { es }.
+		bancos = { es: preguntas },
 		ahora = Date.now,
 		aleatorio = Math.random,
 		maxJugadores = MAX_JUGADORES,
 	} = {}) {
-		this.preguntas = preguntas;
+		this.bancos = bancos;
 		this.ahora = ahora;
 		this.aleatorio = aleatorio;
 		this.maxJugadores = maxJugadores;
@@ -197,21 +200,26 @@ export class GestorSalas {
 		if (!esObjeto(datos)) throw new ErrorSala("DATOS_INVALIDOS");
 		const nombre = limpiarNombre(datos.nombre);
 		if (!nombre) throw new ErrorSala("NOMBRE_INVALIDO");
+		const banco = datos.banco ?? "es";
+		if (typeof banco !== "string" || !Object.hasOwn(this.bancos, banco)) {
+			throw new ErrorSala("BANCO_INVALIDO");
+		}
+		const preguntasBanco = this.bancos[banco];
 		const categorias = datos.categorias ?? [];
 		if (
 			!Array.isArray(categorias) ||
 			categorias.some(
 				(categoria) =>
 					typeof categoria !== "string" ||
-					!this.preguntas.some((pregunta) => pregunta.categoria === categoria),
+					!preguntasBanco.some((pregunta) => pregunta.categoria === categoria),
 			)
 		) {
 			throw new ErrorSala("CATEGORIAS_INVALIDAS");
 		}
 		const preguntasBase =
 			categorias.length > 0
-				? this.preguntas.filter((pregunta) => categorias.includes(pregunta.categoria))
-				: this.preguntas;
+				? preguntasBanco.filter((pregunta) => categorias.includes(pregunta.categoria))
+				: preguntasBanco;
 		if (
 			!Number.isInteger(datos.numPreguntas) ||
 			datos.numPreguntas < 1 ||
@@ -229,6 +237,7 @@ export class GestorSalas {
 		this.salas.set(codigo, {
 			codigo,
 			estado: "ESPERANDO",
+			banco,
 			anfitrion: anfitrion.sessionId,
 			preguntas: prepararTest(preguntasBase, datos.numPreguntas),
 			timerConfig,
@@ -389,6 +398,8 @@ export class GestorSalas {
 		const vista = {
 			codigo: sala.codigo,
 			estado: sala.estado,
+			// Las salas guardadas antes de existir los bancos eran todas de España.
+			banco: sala.banco ?? "es",
 			soyAnfitrion: sala.anfitrion === jugador.sessionId,
 			nombre: jugador.nombre,
 			totalPreguntas: total,

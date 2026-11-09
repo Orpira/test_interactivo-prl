@@ -12,6 +12,8 @@ Aplicación interactiva para practicar y evaluar conocimientos de Prevención de
 - **El servidor es la autoridad:** corrige, controla el tiempo y calcula el ranking. Las respuestas correctas no se envían antes de responder y un reenvío por un corte de red no cuenta dos veces.
 - **Salas guardadas en disco:** sobreviven a reinicios y despliegues.
 - **Temporizador opcional:** 15/30/45/60 segundos por pregunta o 5/10/15/20 minutos por test.
+- **Dos reglamentaciones:** al empezar se elige España (PRL, 170 preguntas) o Colombia (SST, 89 preguntas). La elección se recuerda, se comparte con la sección de normativa y también vale para las salas en red.
+- **Normativa por país:** sección de documentación con selector España / Colombia. Para Colombia recoge el SG-SST (Decreto 1072 de 2015, Resolución 0312 de 2019) y las novedades 2025-2026 (Resoluciones 1843 y 3461 de 2025, Decreto 728 de 2025, Decreto 1040 de 2026…), con buscador, filtro de novedades, normas derogadas y tabla de equivalencias. Los datos están en `src/data/normativa.js`.
 - **Interfaz adaptable:** optimizada para móvil y escritorio, con soporte para `prefers-reduced-motion`.
 
 ## Stack tecnológico
@@ -198,6 +200,10 @@ El anfitrión crea una sala, comparte el código `PRL-XXXX` y espera a que se un
 | Vigilancia de la Salud | 5 |
 | **Total** | **170** |
 
+### Banco de Colombia (SST)
+
+`public/preguntas-sst-colombia.json` contiene **89 preguntas en 16 categorías** sobre el SG-SST colombiano, incluidas las normas de 2025-2026. Usa ids desde 1001 y categorías propias, agrupadas en `GRUPOS_CO` (`src/utils/reglamentacion.js`). La API carga los dos bancos y cada sala guarda el suyo (`banco: "es" | "co"`; sin indicarlo, `"es"`).
+
 Cada pregunta contiene `id`, `categoria`, `pregunta`, `opciones` y `respuesta`. El valor `respuesta` es el índice de la opción correcta antes de barajar.
 
 ## Pruebas y scripts
@@ -242,7 +248,7 @@ Todas las respuestas son JSON con `cache-control: no-store`. Los errores llevan 
 | Método y ruta | Sesión | Descripción |
 | --- | --- | --- |
 | `GET /health` | No | `{ "ok": true }` |
-| `POST /api/salas` | No | Crea una sala: `{nombre, numPreguntas, categorias, timerConfig}` → `201 {codigo, sessionId}` |
+| `POST /api/salas` | No | Crea una sala: `{nombre, numPreguntas, banco?, categorias, timerConfig}` → `201 {codigo, sessionId}`. `banco` es `"es"` (por defecto) o `"co"` |
 | `POST /api/salas/:codigo/unirse` | No | `{nombre}` → `{codigo, sessionId}` |
 | `GET /api/salas/:codigo` | Sí | Vista de la sala para ese alumno |
 | `POST /api/salas/:codigo/iniciar` | Sí | Solo el anfitrión |

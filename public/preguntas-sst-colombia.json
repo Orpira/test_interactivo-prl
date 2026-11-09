@@ -1,0 +1,1070 @@
+[
+  {
+    "id": 1001,
+    "categoria": "Sistema General de Riesgos Laborales",
+    "pregunta": "¿Qué norma cambió la denominación «salud ocupacional» por «seguridad y salud en el trabajo»?",
+    "opciones": [
+      "Ley 100 de 1993",
+      "Ley 1562 de 2012",
+      "Decreto 1295 de 1994",
+      "Ley 9 de 1979"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1002,
+    "categoria": "Sistema General de Riesgos Laborales",
+    "pregunta": "¿Quién paga la cotización a riesgos laborales de un trabajador dependiente?",
+    "opciones": [
+      "El trabajador en su totalidad",
+      "El empleador y el trabajador a partes iguales",
+      "El empleador en su totalidad",
+      "La ARL"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1003,
+    "categoria": "Sistema General de Riesgos Laborales",
+    "pregunta": "¿Cuántas clases de riesgo existen para la cotización al Sistema General de Riesgos Laborales?",
+    "opciones": [
+      "Tres",
+      "Cuatro",
+      "Cinco",
+      "Seis"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1004,
+    "categoria": "Sistema General de Riesgos Laborales",
+    "pregunta": "La clase de riesgo V corresponde a:",
+    "opciones": [
+      "Riesgo mínimo",
+      "Riesgo medio",
+      "Riesgo alto",
+      "Riesgo máximo"
+    ],
+    "respuesta": 3
+  },
+  {
+    "id": 1005,
+    "categoria": "Sistema General de Riesgos Laborales",
+    "pregunta": "¿Qué entidad cubre las prestaciones asistenciales y económicas derivadas de un accidente de trabajo?",
+    "opciones": [
+      "La EPS",
+      "La ARL",
+      "La caja de compensación familiar",
+      "El fondo de pensiones"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1006,
+    "categoria": "Sistema General de Riesgos Laborales",
+    "pregunta": "Según la Ley 1562 de 2012, ¿se considera accidente de trabajo el que ocurre durante el traslado al trabajo en un transporte suministrado por el empleador?",
+    "opciones": [
+      "No, nunca",
+      "Sí",
+      "Solo si ocurre en horario nocturno",
+      "Solo para contratistas"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1007,
+    "categoria": "Sistema General de Riesgos Laborales",
+    "pregunta": "Para un contratista independiente con contrato de prestación de servicios superior a un mes en actividades de riesgo IV o V, ¿quién paga la cotización a la ARL?",
+    "opciones": [
+      "El propio contratista",
+      "El contratante",
+      "Se reparte al 50 %",
+      "Está exento de cotizar"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1008,
+    "categoria": "Sistema General de Riesgos Laborales",
+    "pregunta": "¿Qué decreto de 2022 actualizó la tabla de clasificación de actividades económicas para el Sistema General de Riesgos Laborales?",
+    "opciones": [
+      "Decreto 768 de 2022",
+      "Decreto 1072 de 2022",
+      "Decreto 472 de 2022",
+      "Decreto 1477 de 2022"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1009,
+    "categoria": "SG-SST (Decreto 1072)",
+    "pregunta": "¿En qué ciclo de mejora continua se basa el SG-SST del Decreto 1072 de 2015?",
+    "opciones": [
+      "DMAIC",
+      "PHVA: planificar, hacer, verificar y actuar",
+      "Kaizen 5S",
+      "Ciclo de Deming de seis fases"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1010,
+    "categoria": "SG-SST (Decreto 1072)",
+    "pregunta": "¿Durante cuánto tiempo, como mínimo, deben conservarse determinados registros del SG-SST, como los resultados de mediciones ambientales y evaluaciones médicas?",
+    "opciones": [
+      "5 años",
+      "10 años",
+      "20 años",
+      "Mientras dure el contrato"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1011,
+    "categoria": "SG-SST (Decreto 1072)",
+    "pregunta": "¿Quién debe firmar la política de seguridad y salud en el trabajo?",
+    "opciones": [
+      "El presidente del COPASST",
+      "El responsable del SG-SST",
+      "El representante legal o máximo nivel de dirección",
+      "La ARL"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1012,
+    "categoria": "SG-SST (Decreto 1072)",
+    "pregunta": "¿Con qué frecuencia mínima debe la alta dirección revisar el SG-SST?",
+    "opciones": [
+      "Una vez al año",
+      "Cada dos años",
+      "Cada mes",
+      "Solo tras un accidente grave"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1013,
+    "categoria": "SG-SST (Decreto 1072)",
+    "pregunta": "Según el Decreto 1072 de 2015, ¿cuál es el orden de la jerarquía de controles?",
+    "opciones": [
+      "EPP, controles administrativos, ingeniería, sustitución, eliminación",
+      "Eliminación, sustitución, controles de ingeniería, controles administrativos y EPP",
+      "Sustitución, EPP, eliminación, señalización",
+      "Controles administrativos, EPP, eliminación"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1014,
+    "categoria": "SG-SST (Decreto 1072)",
+    "pregunta": "Antes de introducir un cambio en procesos, instalaciones o métodos de trabajo, el SG-SST exige:",
+    "opciones": [
+      "Avisar solo a la ARL",
+      "Evaluar el impacto en SST mediante la gestión del cambio",
+      "Repetir todas las evaluaciones médicas",
+      "Suspender la actividad un mes"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1015,
+    "categoria": "SG-SST (Decreto 1072)",
+    "pregunta": "¿Qué tres tipos de indicadores debe definir el SG-SST?",
+    "opciones": [
+      "De estructura, de proceso y de resultado",
+      "Financieros, comerciales y técnicos",
+      "De entrada, de salida y de coste",
+      "Diarios, mensuales y anuales"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1016,
+    "categoria": "SG-SST (Decreto 1072)",
+    "pregunta": "¿Qué es la evaluación inicial del SG-SST?",
+    "opciones": [
+      "El examen médico de ingreso",
+      "El diagnóstico para identificar prioridades y establecer la línea base del sistema",
+      "La primera visita de la ARL",
+      "El primer simulacro de evacuación"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1017,
+    "categoria": "SG-SST (Decreto 1072)",
+    "pregunta": "¿Qué duración tiene el curso virtual en SST exigido a quien diseña o administra el SG-SST?",
+    "opciones": [
+      "20 horas",
+      "50 horas",
+      "120 horas",
+      "No se exige curso"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1018,
+    "categoria": "SG-SST (Decreto 1072)",
+    "pregunta": "¿Con qué frecuencia mínima se realiza la auditoría del cumplimiento del SG-SST?",
+    "opciones": [
+      "Anual",
+      "Cada cinco años",
+      "Solo cuando lo pida el Ministerio",
+      "Cada trimestre"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1019,
+    "categoria": "Estándares Mínimos",
+    "pregunta": "¿Qué resolución establece los Estándares Mínimos del SG-SST?",
+    "opciones": [
+      "Resolución 1111 de 2017",
+      "Resolución 0312 de 2019",
+      "Resolución 2013 de 1986",
+      "Resolución 1401 de 2007"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1020,
+    "categoria": "Estándares Mínimos",
+    "pregunta": "¿Cuántos estándares mínimos debe cumplir una empresa de hasta 10 trabajadores clasificada en riesgo I, II o III?",
+    "opciones": [
+      "3",
+      "7",
+      "21",
+      "60"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1021,
+    "categoria": "Estándares Mínimos",
+    "pregunta": "¿Cuántos estándares mínimos debe cumplir una empresa de 11 a 50 trabajadores en riesgo I, II o III?",
+    "opciones": [
+      "7",
+      "21",
+      "35",
+      "60"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1022,
+    "categoria": "Estándares Mínimos",
+    "pregunta": "Una empresa de 30 trabajadores clasificada en riesgo V, ¿cuántos estándares mínimos debe cumplir?",
+    "opciones": [
+      "7",
+      "21",
+      "60",
+      "Ninguno"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1023,
+    "categoria": "Estándares Mínimos",
+    "pregunta": "Según la Resolución 0312 de 2019, una autoevaluación con resultado inferior al 60 % se considera:",
+    "opciones": [
+      "Aceptable",
+      "Moderadamente aceptable",
+      "Crítica",
+      "Excelente"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1024,
+    "categoria": "Estándares Mínimos",
+    "pregunta": "¿Con qué frecuencia se realiza la autoevaluación de los Estándares Mínimos?",
+    "opciones": [
+      "Mensual",
+      "Anual",
+      "Cada tres años",
+      "Solo al crear la empresa"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1025,
+    "categoria": "Estándares Mínimos",
+    "pregunta": "¿Cuántos estándares mínimos deben cumplir las unidades de producción agropecuaria de hasta 10 trabajadores en riesgo I, II o III?",
+    "opciones": [
+      "3",
+      "7",
+      "10",
+      "21"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1026,
+    "categoria": "Inspección y Sanciones",
+    "pregunta": "Según la Ley 1562 de 2012, ¿cuál es la multa máxima por incumplir el SG-SST cuando no hay muerte del trabajador?",
+    "opciones": [
+      "Hasta 100 SMMLV",
+      "Hasta 500 SMMLV",
+      "Hasta 5.000 SMMLV",
+      "No hay multas, solo amonestaciones"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1027,
+    "categoria": "Inspección y Sanciones",
+    "pregunta": "Si el incumplimiento de las normas de SST causa la muerte de un trabajador, la multa puede llegar a:",
+    "opciones": [
+      "200 SMMLV",
+      "500 SMMLV",
+      "1.000 SMMLV",
+      "10.000 SMMLV"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1028,
+    "categoria": "Inspección y Sanciones",
+    "pregunta": "¿Qué resolución de 2025 adoptó el modelo «Una Inspección con Propósito», con visitas sin previo aviso?",
+    "opciones": [
+      "Resolución 4179 de 2025",
+      "Resolución 908 de 2025",
+      "Resolución 1843 de 2025",
+      "Resolución 3461 de 2025"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1029,
+    "categoria": "Inspección y Sanciones",
+    "pregunta": "Desde el 15 de septiembre de 2025, ¿qué norma regula las licencias de Seguridad y Salud en el Trabajo?",
+    "opciones": [
+      "Resolución 754 de 2021",
+      "Resolución 908 de 2025 del Ministerio de Salud",
+      "Ley 1562 de 2012",
+      "Decreto 472 de 2015"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1030,
+    "categoria": "Inspección y Sanciones",
+    "pregunta": "¿Qué decreto establece los criterios para graduar las multas por infracciones en riesgos laborales?",
+    "opciones": [
+      "Decreto 472 de 2015",
+      "Decreto 728 de 2025",
+      "Decreto 1477 de 2014",
+      "Decreto 768 de 2022"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1031,
+    "categoria": "COPASST y Vigía",
+    "pregunta": "¿A partir de cuántos trabajadores debe una empresa conformar un COPASST en lugar de un Vigía de SST?",
+    "opciones": [
+      "5",
+      "10",
+      "20",
+      "50"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1032,
+    "categoria": "COPASST y Vigía",
+    "pregunta": "¿Cuál es el periodo de los integrantes del COPASST?",
+    "opciones": [
+      "1 año",
+      "2 años",
+      "3 años",
+      "4 años"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1033,
+    "categoria": "COPASST y Vigía",
+    "pregunta": "¿Con qué frecuencia mínima se reúne el COPASST?",
+    "opciones": [
+      "Una vez al mes",
+      "Una vez al trimestre",
+      "Una vez al año",
+      "Solo tras un accidente"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1034,
+    "categoria": "COPASST y Vigía",
+    "pregunta": "¿Cuántas horas semanales dentro de la jornada se conceden a los miembros del COPASST para sus funciones?",
+    "opciones": [
+      "1 hora",
+      "2 horas",
+      "4 horas",
+      "8 horas"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1035,
+    "categoria": "COPASST y Vigía",
+    "pregunta": "¿Cómo se eligen los representantes de los trabajadores en el COPASST?",
+    "opciones": [
+      "Los designa el empleador",
+      "Por votación libre de los trabajadores",
+      "Los designa la ARL",
+      "Por sorteo entre los mandos"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1036,
+    "categoria": "COPASST y Vigía",
+    "pregunta": "En una empresa de entre 50 y 499 trabajadores, ¿cuántos representantes tiene cada parte en el COPASST?",
+    "opciones": [
+      "1",
+      "2",
+      "3",
+      "4"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1037,
+    "categoria": "COPASST y Vigía",
+    "pregunta": "¿Qué significa que el COPASST sea «paritario»?",
+    "opciones": [
+      "Que lo preside siempre un trabajador",
+      "Que tiene igual número de representantes del empleador y de los trabajadores",
+      "Que se reúne en días pares",
+      "Que lo controla la ARL"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1038,
+    "categoria": "Convivencia y Acoso Laboral",
+    "pregunta": "¿Qué resolución regula desde septiembre de 2025 el Comité de Convivencia Laboral?",
+    "opciones": [
+      "Resolución 652 de 2012",
+      "Resolución 1356 de 2012",
+      "Resolución 3461 de 2025",
+      "Resolución 2646 de 2008"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1039,
+    "categoria": "Convivencia y Acoso Laboral",
+    "pregunta": "Con la Resolución 3461 de 2025, ¿con qué frecuencia se reúne el Comité de Convivencia Laboral?",
+    "opciones": [
+      "Mensualmente",
+      "Trimestralmente",
+      "Semestralmente",
+      "Anualmente"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1040,
+    "categoria": "Convivencia y Acoso Laboral",
+    "pregunta": "¿Cuál es el periodo de vigencia del Comité de Convivencia Laboral según la Resolución 3461 de 2025?",
+    "opciones": [
+      "1 año",
+      "2 años",
+      "3 años",
+      "Indefinido"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1041,
+    "categoria": "Convivencia y Acoso Laboral",
+    "pregunta": "¿Qué ley define y sanciona el acoso laboral en Colombia?",
+    "opciones": [
+      "Ley 1010 de 2006",
+      "Ley 1562 de 2012",
+      "Ley 100 de 1993",
+      "Ley 2101 de 2021"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1042,
+    "categoria": "Convivencia y Acoso Laboral",
+    "pregunta": "¿Cuál de estas NO es una modalidad de acoso laboral de la Ley 1010 de 2006?",
+    "opciones": [
+      "Maltrato laboral",
+      "Persecución laboral",
+      "Inequidad laboral",
+      "Absentismo laboral"
+    ],
+    "respuesta": 3
+  },
+  {
+    "id": 1043,
+    "categoria": "Convivencia y Acoso Laboral",
+    "pregunta": "¿Qué ley de 2024 obliga a los empleadores a adoptar medidas para prevenir el acoso sexual en el ámbito laboral?",
+    "opciones": [
+      "Ley 2365 de 2024",
+      "Ley 2460 de 2024",
+      "Ley 2191 de 2024",
+      "Ley 2050 de 2024"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1044,
+    "categoria": "Convivencia y Acoso Laboral",
+    "pregunta": "¿Desde cuándo es exigible el Decreto 1040 de 2026 sobre acoso, violencia basada en género y discriminación?",
+    "opciones": [
+      "Desde su publicación, en agosto de 2026, sin periodo de transición",
+      "Desde enero de 2028",
+      "Tras un año de adaptación",
+      "Solo para empresas públicas desde 2027"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1045,
+    "categoria": "Convivencia y Acoso Laboral",
+    "pregunta": "Según el Decreto 1040 de 2026, ¿qué dos instrumentos debe tener el empleador frente al acoso y la discriminación?",
+    "opciones": [
+      "Una póliza y un seguro de vida",
+      "Una política de prevención y un protocolo de atención",
+      "Un reglamento de horarios y un buzón físico",
+      "Un comité de compras y un manual de marca"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1046,
+    "categoria": "Convivencia y Acoso Laboral",
+    "pregunta": "¿Puede sancionarse a un trabajador por declarar como testigo en una denuncia de acoso laboral?",
+    "opciones": [
+      "Sí, si la denuncia no prospera",
+      "No, el Decreto 1040 de 2026 prohíbe las represalias",
+      "Sí, con amonestación escrita",
+      "Depende del reglamento interno"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1047,
+    "categoria": "Riesgo Psicosocial y Salud Mental",
+    "pregunta": "¿Qué resolución adoptó la Batería de instrumentos para la evaluación de factores de riesgo psicosocial como referente obligatorio?",
+    "opciones": [
+      "Resolución 2404 de 2019",
+      "Resolución 2764 de 2022",
+      "Resolución 4272 de 2021",
+      "Resolución 0312 de 2019"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1048,
+    "categoria": "Riesgo Psicosocial y Salud Mental",
+    "pregunta": "Si la evaluación psicosocial arroja un nivel de riesgo alto, ¿con qué frecuencia debe repetirse?",
+    "opciones": [
+      "Cada año",
+      "Cada dos años",
+      "Cada cinco años",
+      "No es necesario repetirla"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1049,
+    "categoria": "Riesgo Psicosocial y Salud Mental",
+    "pregunta": "Si el nivel de riesgo psicosocial es medio o bajo, ¿con qué frecuencia se evalúa?",
+    "opciones": [
+      "Cada seis meses",
+      "Cada año",
+      "Cada dos años",
+      "Cada diez años"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1050,
+    "categoria": "Riesgo Psicosocial y Salud Mental",
+    "pregunta": "¿Qué decreto de 2025 obliga a incluir en el SG-SST la promoción de la salud mental y la prevención del consumo de sustancias psicoactivas?",
+    "opciones": [
+      "Decreto 728 de 2025",
+      "Decreto 1040 de 2025",
+      "Decreto 1072 de 2025",
+      "Decreto 472 de 2025"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1051,
+    "categoria": "Riesgo Psicosocial y Salud Mental",
+    "pregunta": "¿Qué ley de salud mental modificó la Ley 2460 de 2025?",
+    "opciones": [
+      "Ley 1010 de 2006",
+      "Ley 1616 de 2013",
+      "Ley 1562 de 2012",
+      "Ley 100 de 1993"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1052,
+    "categoria": "Riesgo Psicosocial y Salud Mental",
+    "pregunta": "¿Qué resolución de 2008 define las responsabilidades para identificar, evaluar e intervenir los factores de riesgo psicosocial?",
+    "opciones": [
+      "Resolución 2646 de 2008",
+      "Resolución 2346 de 2008",
+      "Resolución 1401 de 2008",
+      "Resolución 1016 de 2008"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1053,
+    "categoria": "Riesgo Psicosocial y Salud Mental",
+    "pregunta": "¿Qué ley reconoce el derecho a la desconexión laboral fuera de la jornada?",
+    "opciones": [
+      "Ley 2191 de 2022",
+      "Ley 2101 de 2021",
+      "Ley 1221 de 2008",
+      "Ley 2466 de 2025"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1054,
+    "categoria": "Evaluaciones Médicas Ocupacionales",
+    "pregunta": "¿Qué resolución regula desde 2025 las evaluaciones médicas ocupacionales y derogó la Resolución 2346 de 2007?",
+    "opciones": [
+      "Resolución 1843 de 2025",
+      "Resolución 908 de 2025",
+      "Resolución 3461 de 2025",
+      "Resolución 2764 de 2022"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1055,
+    "categoria": "Evaluaciones Médicas Ocupacionales",
+    "pregunta": "¿Quién asume el coste de las evaluaciones médicas ocupacionales?",
+    "opciones": [
+      "El trabajador",
+      "La EPS",
+      "El empleador",
+      "La ARL"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1056,
+    "categoria": "Evaluaciones Médicas Ocupacionales",
+    "pregunta": "Según la Resolución 1843 de 2025, ¿cuándo deben programarse las evaluaciones médicas ocupacionales?",
+    "opciones": [
+      "Fuera de la jornada laboral",
+      "Dentro de la jornada laboral",
+      "Solo en vacaciones",
+      "Los fines de semana"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1057,
+    "categoria": "Evaluaciones Médicas Ocupacionales",
+    "pregunta": "¿Cuál de estas NO es un tipo de evaluación médica ocupacional?",
+    "opciones": [
+      "Preingreso",
+      "Periódica",
+      "Posincapacidad",
+      "Promocional de ventas"
+    ],
+    "respuesta": 3
+  },
+  {
+    "id": 1058,
+    "categoria": "Evaluaciones Médicas Ocupacionales",
+    "pregunta": "¿Quién puede realizar las evaluaciones médicas ocupacionales?",
+    "opciones": [
+      "Cualquier profesional de la salud",
+      "Médicos especialistas en SST con licencia vigente",
+      "El responsable del SG-SST",
+      "El jefe inmediato"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1059,
+    "categoria": "Evaluaciones Médicas Ocupacionales",
+    "pregunta": "¿Puede el empleador guardar la historia clínica ocupacional en la hoja de vida del trabajador?",
+    "opciones": [
+      "Sí, siempre",
+      "No; la historia clínica ocupacional es reservada y el empleador no puede conservarla",
+      "Solo si el trabajador lo pide verbalmente",
+      "Sí, si la empresa tiene más de 50 trabajadores"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1060,
+    "categoria": "Accidentes e Incidentes",
+    "pregunta": "¿En qué plazo debe el empleador reportar un accidente de trabajo a la ARL y a la EPS?",
+    "opciones": [
+      "24 horas",
+      "Dentro de los 2 días hábiles siguientes",
+      "15 días",
+      "30 días"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1061,
+    "categoria": "Accidentes e Incidentes",
+    "pregunta": "Según la Resolución 1401 de 2007, ¿en qué plazo debe investigarse un incidente o accidente de trabajo?",
+    "opciones": [
+      "Dentro de los 15 días siguientes",
+      "Dentro de los 2 meses",
+      "Antes de un año",
+      "Solo si hay baja médica"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1062,
+    "categoria": "Accidentes e Incidentes",
+    "pregunta": "¿Quiénes integran como mínimo el equipo investigador de un accidente de trabajo?",
+    "opciones": [
+      "Solo el gerente",
+      "El jefe inmediato o supervisor, un representante del COPASST o el Vigía y el encargado del SG-SST",
+      "Solo la ARL",
+      "El trabajador accidentado y su familia"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1063,
+    "categoria": "Accidentes e Incidentes",
+    "pregunta": "Un incidente de trabajo es:",
+    "opciones": [
+      "Un accidente con baja superior a 30 días",
+      "Un suceso relacionado con el trabajo que pudo causar lesiones pero no las causó o solo requirió primeros auxilios",
+      "Una enfermedad laboral",
+      "Una falta disciplinaria"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1064,
+    "categoria": "Enfermedad Laboral",
+    "pregunta": "¿Qué decreto adopta la tabla de enfermedades laborales en Colombia?",
+    "opciones": [
+      "Decreto 1477 de 2014",
+      "Decreto 1295 de 1994",
+      "Decreto 1072 de 2015",
+      "Decreto 768 de 2022"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1065,
+    "categoria": "Enfermedad Laboral",
+    "pregunta": "Si un trabajador no está de acuerdo con la calificación del origen de su enfermedad, ¿ante quién puede controvertirla?",
+    "opciones": [
+      "Ante las Juntas de Calificación de Invalidez",
+      "Ante el COPASST",
+      "Ante la caja de compensación",
+      "No puede controvertirla"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1066,
+    "categoria": "Enfermedad Laboral",
+    "pregunta": "La enfermedad laboral es la contraída como resultado de:",
+    "opciones": [
+      "Cualquier causa durante la vida laboral",
+      "La exposición a factores de riesgo inherentes a la actividad laboral o al medio en que se trabaja",
+      "Hábitos personales fuera del trabajo",
+      "Un accidente de tráfico personal"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1067,
+    "categoria": "Trabajo en Alturas",
+    "pregunta": "Según la Resolución 4272 de 2021, ¿a partir de qué altura de riesgo de caída se considera trabajo en alturas?",
+    "opciones": [
+      "Más de 1,50 m",
+      "Más de 1,80 m",
+      "Más de 2,0 m",
+      "Más de 3,0 m"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1068,
+    "categoria": "Trabajo en Alturas",
+    "pregunta": "¿Qué resolución derogó la Resolución 1409 de 2012 sobre trabajo en alturas?",
+    "opciones": [
+      "Resolución 4272 de 2021",
+      "Resolución 0312 de 2019",
+      "Resolución 0491 de 2020",
+      "Resolución 5018 de 2019"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1069,
+    "categoria": "Trabajo en Alturas",
+    "pregunta": "¿Cada cuánto debe hacer reentrenamiento un trabajador autorizado para trabajo en alturas?",
+    "opciones": [
+      "Cada 6 meses",
+      "Cada 18 meses",
+      "Cada 5 años",
+      "No hace falta"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1070,
+    "categoria": "Trabajo en Alturas",
+    "pregunta": "¿Qué documento debe diligenciarse antes de iniciar un trabajo en alturas no rutinario?",
+    "opciones": [
+      "El permiso de trabajo en alturas",
+      "La nómina",
+      "El reglamento interno",
+      "La factura del arnés"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1071,
+    "categoria": "Trabajo en Alturas",
+    "pregunta": "¿Cuál de estos es un sistema de protección contra caídas (y no de prevención)?",
+    "opciones": [
+      "Barandas perimetrales",
+      "Señalización del área",
+      "Arnés de cuerpo completo con línea de vida",
+      "Línea de advertencia"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1072,
+    "categoria": "Trabajo en Alturas",
+    "pregunta": "¿Qué rol designa el empleador para planificar el trabajo en alturas, verificar las medidas y autorizar el permiso?",
+    "opciones": [
+      "Coordinador de trabajo en alturas",
+      "Vigía de convivencia",
+      "Revisor fiscal",
+      "Ayudante de cocina"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1073,
+    "categoria": "Espacios Confinados y Riesgo Eléctrico",
+    "pregunta": "¿Qué resolución regula los trabajos en espacios confinados?",
+    "opciones": [
+      "Resolución 0491 de 2020",
+      "Resolución 4272 de 2021",
+      "Resolución 2400 de 1979",
+      "Resolución 1843 de 2025"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1074,
+    "categoria": "Espacios Confinados y Riesgo Eléctrico",
+    "pregunta": "Antes de entrar en un espacio confinado es imprescindible:",
+    "opciones": [
+      "Entrar solo para ganar tiempo",
+      "Contar con permiso de entrada y medir la atmósfera interior",
+      "Usar solo guantes",
+      "Avisar únicamente al final de la jornada"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1075,
+    "categoria": "Espacios Confinados y Riesgo Eléctrico",
+    "pregunta": "¿Qué resolución del Ministerio del Trabajo establece lineamientos de SST en los procesos eléctricos?",
+    "opciones": [
+      "Resolución 5018 de 2019",
+      "Resolución 0773 de 2021",
+      "Resolución 1401 de 2007",
+      "Resolución 2013 de 1986"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1076,
+    "categoria": "Espacios Confinados y Riesgo Eléctrico",
+    "pregunta": "¿Cuál es la primera de las «cinco reglas de oro» para trabajar sin tensión?",
+    "opciones": [
+      "Señalizar la zona",
+      "Abrir con corte visible todas las fuentes de tensión",
+      "Poner a tierra",
+      "Verificar ausencia de tensión"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1077,
+    "categoria": "Sustancias Químicas (SGA)",
+    "pregunta": "¿Qué decreto adoptó en Colombia el Sistema Globalmente Armonizado (SGA) de clasificación y etiquetado de productos químicos?",
+    "opciones": [
+      "Decreto 1496 de 2018",
+      "Decreto 1072 de 2015",
+      "Decreto 1477 de 2014",
+      "Decreto 728 de 2025"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1078,
+    "categoria": "Sustancias Químicas (SGA)",
+    "pregunta": "¿Cuántas secciones tiene una Ficha de Datos de Seguridad conforme al SGA?",
+    "opciones": [
+      "8",
+      "12",
+      "16",
+      "20"
+    ],
+    "respuesta": 2
+  },
+  {
+    "id": 1079,
+    "categoria": "Sustancias Químicas (SGA)",
+    "pregunta": "¿Qué resolución de 2021 define las acciones para implementar el SGA en los lugares de trabajo?",
+    "opciones": [
+      "Resolución 0773 de 2021",
+      "Resolución 4272 de 2021",
+      "Resolución 754 de 2021",
+      "Resolución 2764 de 2021"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1080,
+    "categoria": "Peligros y Matriz de Riesgos",
+    "pregunta": "¿Qué guía técnica colombiana se usa ampliamente para identificar peligros y valorar riesgos?",
+    "opciones": [
+      "GTC 45",
+      "NTC 1500",
+      "ISO 9001",
+      "GTC 185"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1081,
+    "categoria": "Peligros y Matriz de Riesgos",
+    "pregunta": "En la metodología GTC 45, el nivel de riesgo se obtiene multiplicando:",
+    "opciones": [
+      "El nivel de probabilidad por el nivel de consecuencia",
+      "El número de trabajadores por las horas",
+      "La exposición por el salario",
+      "El coste por la frecuencia"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1082,
+    "categoria": "Peligros y Matriz de Riesgos",
+    "pregunta": "¿Con qué frecuencia mínima debe actualizarse la identificación de peligros y valoración de riesgos según los Estándares Mínimos?",
+    "opciones": [
+      "Anualmente y cuando ocurra un accidente mortal o cambie el proceso",
+      "Cada diez años",
+      "Solo al crear la empresa",
+      "Nunca, es un documento fijo"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1083,
+    "categoria": "Plan de Emergencias",
+    "pregunta": "¿Con qué frecuencia mínima debe realizarse un simulacro dentro del SG-SST?",
+    "opciones": [
+      "Una vez al año",
+      "Cada cinco años",
+      "Solo si lo pide el cuerpo de bomberos",
+      "Cada mes"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1084,
+    "categoria": "Plan de Emergencias",
+    "pregunta": "¿Qué grupo de trabajadores, organizado y entrenado, actúa en primera respuesta ante una emergencia?",
+    "opciones": [
+      "El COPASST",
+      "La brigada de emergencias",
+      "El Comité de Convivencia",
+      "La junta directiva"
+    ],
+    "respuesta": 1
+  },
+  {
+    "id": 1085,
+    "categoria": "Plan de Emergencias",
+    "pregunta": "¿Qué decreto de 2017 regula el Plan de Gestión del Riesgo de Desastres de las Entidades Públicas y Privadas (PGRDEPP)?",
+    "opciones": [
+      "Decreto 2157 de 2017",
+      "Decreto 1072 de 2017",
+      "Decreto 1496 de 2017",
+      "Decreto 472 de 2017"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1086,
+    "categoria": "Jornada y Reforma Laboral",
+    "pregunta": "¿Cuál es la jornada máxima ordinaria semanal en Colombia desde el 15 de julio de 2026?",
+    "opciones": [
+      "48 horas",
+      "46 horas",
+      "44 horas",
+      "42 horas"
+    ],
+    "respuesta": 3
+  },
+  {
+    "id": 1087,
+    "categoria": "Jornada y Reforma Laboral",
+    "pregunta": "¿Qué ley redujo gradualmente la jornada laboral de 48 a 42 horas semanales?",
+    "opciones": [
+      "Ley 2101 de 2021",
+      "Ley 2466 de 2025",
+      "Ley 789 de 2002",
+      "Ley 50 de 1990"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1088,
+    "categoria": "Jornada y Reforma Laboral",
+    "pregunta": "¿Qué ley de 2025 es conocida como la reforma laboral para el trabajo decente y digno?",
+    "opciones": [
+      "Ley 2466 de 2025",
+      "Ley 2460 de 2025",
+      "Ley 2365 de 2025",
+      "Ley 1562 de 2025"
+    ],
+    "respuesta": 0
+  },
+  {
+    "id": 1089,
+    "categoria": "Jornada y Reforma Laboral",
+    "pregunta": "Según la reforma laboral de 2025, ¿qué debe hacer el empleador con una trabajadora gestante cuyo puesto pone en riesgo su salud o la del feto?",
+    "opciones": [
+      "Despedirla con indemnización",
+      "Reubicarla sin afectar su salario",
+      "Reducirle el salario",
+      "Enviarla a vacaciones obligatorias"
+    ],
+    "respuesta": 1
+  }
+]

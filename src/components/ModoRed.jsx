@@ -6,7 +6,7 @@ import QuizOnline from "./QuizOnline.jsx";
 import Sala from "./Sala.jsx";
 
 // `recuperando` indica que el modo en red se abrió solo, al encontrar una sesión guardada.
-export default function ModoRed({ onVolverInicio, recuperando = false }) {
+export default function ModoRed({ onVolverInicio, recuperando = false, pais = "es", onCambiarPais }) {
 	const [sesion, setSesion] = useState(() => leerSesion());
 	const [aviso, setAviso] = useState("");
 	const { vista, sesionInvalida, reconectando, aplicarVista, recargar, ahoraServidor } =
@@ -44,7 +44,15 @@ export default function ModoRed({ onVolverInicio, recuperando = false }) {
 	}
 
 	if (!sesion) {
-		return <Sala aviso={aviso} onEntrar={entrar} onVolverInicio={onVolverInicio} />;
+		return (
+			<Sala
+				aviso={aviso}
+				onEntrar={entrar}
+				onVolverInicio={onVolverInicio}
+				pais={pais}
+				onCambiarPais={onCambiarPais}
+			/>
+		);
 	}
 
 	if (!vista) {

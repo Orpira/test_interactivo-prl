@@ -14,9 +14,9 @@ export default function Hero() {
 				Aprende prevención <span className="bg-signal text-ink px-2 rounded-md">haciendo</span>
 			</h1>
 			<p className="text-lg md:text-xl mb-9 max-w-2xl text-ink-muted">
-				Plataforma interactiva de tests para aprender la normativa PRL española
-				de forma clara y práctica. Pon a prueba tus conocimientos pregunta a
-				pregunta.
+				Plataforma interactiva de tests para aprender prevención de riesgos
+				laborales de forma clara y práctica, con documentación de la normativa
+				de España y de Colombia.
 			</p>
 			<Features />
 			<a
@@ -32,6 +32,13 @@ export default function Hero() {
 					className="hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
 				>
 					Test PRL
+				</a>
+				<span aria-hidden="true" className="h-px w-8 bg-line" />
+				<a
+					href="#normativa"
+					className="hover:text-primary focus-visible:outline focus-visible:outline-2 focus-visible:outline-primary"
+				>
+					Normativa ES · CO
 				</a>
 				<span aria-hidden="true" className="h-px w-8 bg-line" />
 			</div>

@@ -1,4 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
+import { reglamentacion } from "../utils/reglamentacion.js";
 import { Timer, Trophy } from "lucide-react";
 import { responder as apiResponder } from "../api/salas.js";
 
@@ -293,7 +294,9 @@ export default function QuizOnline({
 
 	return (
 		<section id="quiz" className="bg-bg px-4 py-10 md:p-12 text-ink">
-			<h2 className="text-4xl font-display mb-1 text-center">Test de PRL</h2>
+			<h2 className="text-4xl font-display mb-1 text-center">
+				Test de {reglamentacion(vista.banco).siglas}
+			</h2>
 			<p className="text-center text-sm text-ink-muted mb-1">
 				{vista.nombre} · Sala <span className="font-mono">{vista.codigo}</span>
 			</p>

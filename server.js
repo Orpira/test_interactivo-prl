@@ -2,9 +2,12 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { crearServicio } from "./src/server/servicio.js";
 
-const preguntas = JSON.parse(
-	readFileSync(new URL("./public/preguntas-prl.json", import.meta.url), "utf-8"),
-);
+const leerBanco = (ruta) => JSON.parse(readFileSync(new URL(ruta, import.meta.url), "utf-8"));
+// Un banco por reglamentación: España (PRL) y Colombia (SST).
+const bancos = {
+	es: leerBanco("./public/preguntas-prl.json"),
+	co: leerBanco("./public/preguntas-sst-colombia.json"),
+};
 const PORT = Number(process.env.PORT) || 8788;
 const HOST = process.env.HOST || "0.0.0.0";
 const directorioDatos = resolve(process.env.PRL_DATA_DIR || "./.data");
@@ -14,7 +17,7 @@ const allowedOrigins = (process.env.PRL_ALLOWED_ORIGINS || "http://localhost:517
 	.filter(Boolean);
 const trustProxy = process.env.PRL_TRUST_PROXY === "true";
 
-const servicio = await crearServicio({ preguntas, directorioDatos, allowedOrigins, trustProxy });
+const servicio = await crearServicio({ bancos, directorioDatos, allowedOrigins, trustProxy });
 
 servicio.httpServer.listen(PORT, HOST, () => {
 	console.log(`API de salas PRL en http://${HOST}:${PORT} (datos en ${directorioDatos})`);
